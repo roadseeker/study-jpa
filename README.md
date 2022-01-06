@@ -308,16 +308,19 @@ public class HomeController {
 * H2 데이터베이스는 개발이나 테스트용도로 가볍고 편리한 DB
 
 H2 Database 다운로드 사이트(https://www.h2database.com)
+
 최신버전을 다운로드 받아서 사용한다. 현재는 2.0.206(2022-01-04) 버전이다.
+
 링크: https://github.com/h2database/h2database/releases/download/version-2.0.206/h2-2022-01-04.zip
 
 다운받은 후 원하는 위치에 압축을 풀고 ./h2/bin 디렉토리의 h2.bat을 실행한다.(리눅스: h2.sh)
-실행 후 웹브라우저가 자동실행되어 접속설정창이 열린다.(http://192.168.1.1:8082/login.do)
+실행 후 웹브라우저가 자동실행되어 접속설정창이 열린다.(http://localhost:8082/login.do)
+
 * 데이터베이스 파일 생성 방법
 
-jdbc:h2:~/demoshop (최소 한번)
-파일 생성 확인: 윈도우 자신의 계정 폴더에서 demoshop.mv.db 
-이후 부터는 jdbc:h2:tcp://localhost/~/demoshop
+    * jdbc:h2:~/demoshop (접속 창에서 최소 한번 실행하여 db를 생성한다.)
+    * 파일 생성 확인: 윈도우 자신의 계정 폴더에서 demoshop.mv.db
+    * 이후 부터는 jdbc:h2:tcp://localhost/~/demoshop
 
 [그림 5 H2db 접속]  
 ![h2db_connect](https://user-images.githubusercontent.com/5433728/148383753-c5ca6e6c-6f66-447e-85ab-f7702564b6ab.jpg)
