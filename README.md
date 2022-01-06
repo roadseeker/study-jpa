@@ -66,7 +66,7 @@
 [참조 링크]: https://naver.com "네이버로 이동합니다!"
 
 
-![대체 텍스트(alternative text)를 입력하세요!](https://github.com/roadseeker/study-jpa/blob/main/src/main/resources/static/images/springio_setting.jpg "링크 설명(title)을 작성하세요.")
+![대체 텍스트(alternative text)를 입력하세요!](![springio_setting](https://user-images.githubusercontent.com/5433728/148364927-3e907ac5-577e-4ef1-be5c-3619814ee78b.jpg) "링크 설명(title)을 작성하세요.")
 
 ![Kayak][logo]
 
