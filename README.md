@@ -322,7 +322,7 @@ jdbc:h2:~/demoshop (최소 한번)
 [그림 5 H2db 접속]  
 ![h2db_connect](https://user-images.githubusercontent.com/5433728/148383753-c5ca6e6c-6f66-447e-85ab-f7702564b6ab.jpg)
 
-[그림 5 H2db 개발환경]
+[그림 6 H2db 개발환경]
 ![h2database](https://user-images.githubusercontent.com/5433728/148383560-21dfbecf-dbaf-4823-84cd-58fe706fbae2.jpg)
 
 * JPA와 DB연결 설정 및 동작 확인
@@ -357,20 +357,92 @@ logging:
 
 1. 회원엔티티
 ```java
+package com.innotree.bcs.bp.study.jpa.demo.member.domain;
 
+import lombok.Getter;
+import lombok.Setter;
+
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+
+@Entity
+@Getter @Setter
+public class Member {
+
+    @Id @GeneratedValue
+    private Long id;
+    private String name;
+}
 ```
 2. 회원레포지토리
 ```java
+package com.innotree.bcs.bp.study.jpa.demo.member.repository;
 
+import com.innotree.bcs.bp.study.jpa.demo.member.domain.Member;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Repository;
+
+import javax.persistence.EntityManager;
+
+@Repository
+@RequiredArgsConstructor
+public class MemberRepository {
+    private final EntityManager em;
+
+    public Long save(Member member) {
+        em.persist(member);
+        return member.getId();
+    }
+
+    public Member findOne(Long memberId){
+        return em.find(Member.class, memberId);
+    }
+}
 ```
 3. 테스트
 ````java
+package com.innotree.bcs.bp.study.jpa.demo.member.repository;
 
+import com.innotree.bcs.bp.study.jpa.demo.member.domain.Member;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.Rollback;
+import org.springframework.transaction.annotation.Transactional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+@SpringBootTest
+class MemberRepositoryTest {
+    @Autowired MemberRepository repository;
+
+    @Test
+    @DisplayName(value = "회원저장")
+    @Transactional
+    @Rollback(value = false)
+    public void save() {
+        Member member = new Member();
+        member.setName("lee kyoungik");
+        Long savedId = repository.save(member);
+
+        Member findMember = repository.findOne(savedId);
+
+        assertThat(savedId).isEqualTo(findMember.getId());
+        assertThat(findMember.getName()).isEqualTo(member.getName());
+        assertThat(findMember).isEqualTo(member);
+    }
+}
 ````
+[그림 7 테스트성공]
+
+![jap_db_integration_success](https://user-images.githubusercontent.com/5433728/148391704-96ba70a9-ece0-490b-a2a0-19ac8958e01a.jpg)
+
 
 지금까지가 스프링부트환경에서 JPA demo를 개발하기 위한 환경 구성이다.
 
-앞으로는 고객의 요구사항을 분석하여 도메인을 설계하고 도메인을 바탕으로 JPA이용하여 간단한 기능을 구헌하면서 JPA 구조와
+앞으로는 고객의 요구사항을 분석하여 도메인을 설계하고 도메인을 바탕으로 JPA이용하여 기능을 구헌하면서 JPA 구조와
 사용방법을 알아보도록 하겠다.
 
 
