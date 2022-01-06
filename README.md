@@ -98,8 +98,8 @@ org.springframework.boot:spring-boot-starter-web을 디펜던시로 추가하게
 - 스프링 부트는 독립적으로 실행 가능한 애플리케이션을 빠르게 개발하는 것을 목표로 하기 때문에 웹 애플리케이션도 WAR가 아닌 
 **JAR파일로 패키징 하여 사용**할 수 있다.
 
-[그림 2] IDE에 프로젝트 임포트 
-![graddle_project](https://user-images.githubusercontent.com/5433728/148372869-562d1d05-6f23-4152-81ce-a665d6c02cf3.jpg)
+[그림 2] IDE에 프로젝트 임포트
+![graddle_project](https://user-images.githubusercontent.com/5433728/148400199-dcb90beb-06e9-4ef1-a345-4a29a09ca112.jpg)
 
 * 부트기동
 
