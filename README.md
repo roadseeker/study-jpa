@@ -1,3 +1,13 @@
+#스프링부트와 JPA 스터디
+
+* 준비사항
+  * 스프링부트 스타터(http://start.spring.io/)
+  * 디펜던시: web, thymleaf, jpa, h2, lombok, validation
+    * groupId : jpastudy
+    * artifactId: demo
+  * 스프링부트: 2.6.2 
+  * Gradle Project
+  * Packaging: Jar
 
 
 
@@ -110,6 +120,7 @@ public class HelloWorld {
 | `relative` | 요소 자신을 기준으로 배치 |  |
 | `absolute` | 위치 상 부모(조상)요소를 기준으로 배치 |  |
 | `fixed` | 브라우저 창을 기준으로 배치 |  |
+
 
 값 | 의미 | 기본값
 ---|:---:|---:
