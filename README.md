@@ -403,7 +403,7 @@ public class MemberRepository {
     }
 }
 ```
-3. 테스트
+3. 테스트(src에 main과 test 폴더가 존재하는데 테스트파일은 test폴더 아래에 만든다)
 ````java
 package com.innotree.bcs.bp.study.jpa.demo.member.repository;
 
@@ -440,15 +440,14 @@ class MemberRepositoryTest {
 ````
 [그림 7 테스트성공]
 
-![jap_db_integration_success](https://user-images.githubusercontent.com/5433728/148391704-96ba70a9-ece0-490b-a2a0-19ac8958e01a.jpg)
-
+![jap_db_integration_success](https://user-images.githubusercontent.com/5433728/148395572-a7e4ceed-127b-443e-a43f-a2eaa494294b.jpg)
 
 지금까지가 스프링부트환경에서 JPA demo를 개발하기 위한 환경 구성이다.
 
 앞으로는 고객의 요구사항을 분석하여 도메인을 설계하고 도메인을 바탕으로 JPA이용하여 기능을 구헌하면서 JPA 구조와
 사용방법을 알아보도록 하겠다.
 
-
+# 마크다운 사용법 참조용(세미나와 관련없음)
 
 # 제목 1
 ## 제목 2
