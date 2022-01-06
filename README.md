@@ -1,5 +1,7 @@
 # 스프링부트와 JPA 스터디
 
+_세미나 자료는 김영환님(인프런 JPA 강의자)의 자료를 참조하여 작성하였습니다._
+
 ## 준비사항
   * 스프링부트 스타터(http://start.spring.io/)를 이용해서 프로젝트 생성한다
     * java: 11
@@ -10,7 +12,7 @@
     * 스프링부트: 2.6.2 
     * Gradle Project
     * Packaging: Jar
----
+
   * [그림 1] 스프링이니셜라이즈 설정 화면(http://start.spring.io/)
 
 ![springio_setting](https://user-images.githubusercontent.com/5433728/148364927-3e907ac5-577e-4ef1-be5c-3619814ee78b.jpg "spring io 설정화면")
@@ -19,7 +21,7 @@
 디펜던시를 선택하고 **GENERATE** 버튼을 클릭하여 zip 파일을 다운로드 받는다.
 다운로드 받은 zip 파일을 해제하고 IDE로 임포트하면 그래들 프로젝트가 만들어진다. 
 
----
+
 * build.graddle Graddle 전체 설정
 
 ```graddle
@@ -54,6 +56,7 @@ test {
 	useJUnitPlatform()
 }
 ```
+---
 ## DomoApplication 동작확인
 
 앱어플리케이션 실행후 8080포트로 어플리케이션 기동된다. 부트는 최초 기동시 @SpringBootApplication 어노테이션이 있는 
@@ -155,6 +158,7 @@ public class DemoApplication {
 2022-01-06 19:40:27.563  INFO 7116 --- [  restartedMain] c.i.b.bp.study.jpa.demo.DemoApplication  : Started DemoApplication in 2.405 seconds (JVM running for 4.59)
 
 ```
+---
 ## 스프링 부트 thymeleaf viewName 매핑
 
 application.properties --> application.yml 파일로 변경 야믈파일이 프로퍼티 파일보다 간결하여 요즘 선호되고 있다.
@@ -341,6 +345,7 @@ public class HomeController {
 [그림 4] DEMO shop 
 ![home_view](https://user-images.githubusercontent.com/5433728/148380576-b1b7f105-9960-4757-ac8d-b6b4f64f148a.jpg)
 
+---
 ## H2 DB 설치
 * H2 데이터베이스는 개발이나 테스트용도로 가볍고 편리한 DB
 
@@ -475,7 +480,7 @@ class MemberRepositoryTest {
     }
 }
 ````
-[그림 7 테스트성공]
+[그림 7 테스트성공 확인]
 
 ![jap_db_integration_success](https://user-images.githubusercontent.com/5433728/148395572-a7e4ceed-127b-443e-a43f-a2eaa494294b.jpg)
 
