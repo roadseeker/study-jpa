@@ -1,19 +1,22 @@
 # 스프링부트와 JPA 스터디
 
 ## 준비사항
-  * 스프링부트 스타터(http://start.spring.io/)
-  * 디펜던시: web, thymleaf, jpa, h2, lombok, validation
-    * groupId : jpastudy
-    * artifactId: demo
-  * 스프링부트: 2.6.2 
-  * Gradle Project
-  * Packaging: Jar
+  * 스프링부트 스타터(http://start.spring.io/) 를 이용해서 프로젝트 생성
+
+    * 디펜던시: web, thymleaf, jpa, h2, lombok, validation
+      * groupId : jpastudy
+      * artifactId: demo
+    * 스프링부트: 2.6.2 
+    * Gradle Project
+    * Packaging: Jar
 ---
   * [그림 1] 스프링이니셜라이즈 설정된 화면(http://start.spring.io/)
-  * ![springio_setting](https://user-images.githubusercontent.com/5433728/148364927-3e907ac5-577e-4ef1-be5c-3619814ee78b.jpg "spring io 설정화면")
-ADD DEPENDENCIES... 버튼을 클릭해서 디펜던시를 선택하고 GENERATE 버튼을 클릭하여 zip 파일을 다운로드 받습니다.
+
+![springio_setting](https://user-images.githubusercontent.com/5433728/148364927-3e907ac5-577e-4ef1-be5c-3619814ee78b.jpg "spring io 설정화면")
+
+**ADD DEPENDENCIES...** 버튼을 클릭해서 디펜던시를 선택하고 **GENERATE** 버튼을 클릭하여 zip 파일을 다운로드 받습니다.
 다운로드 받은 zip 파일을 해제하고 IDE로 임포트하면 그래들 프로젝트가 생성됩니다. 
-  * 
+
 
 
 ---
