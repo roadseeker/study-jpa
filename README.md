@@ -2,9 +2,10 @@
 
 ## 준비사항
   * 스프링부트 스타터(http://start.spring.io/)를 이용해서 프로젝트 생성한다
-
+    * java: 11
+    * IDE: 편한것(Eclips, InteliJ)
     * 디펜던시: web, thymleaf, jpa, h2, lombok, validation
-      * groupId : jpastudy
+      * groupId : com.innotree.bcs.bp.study.jpa
       * artifactId: demo
     * 스프링부트: 2.6.2 
     * Gradle Project
@@ -447,7 +448,8 @@ class MemberRepositoryTest {
 앞으로는 고객의 요구사항을 분석하여 도메인을 설계하고 도메인을 바탕으로 JPA이용하여 기능을 구헌하면서 JPA 구조와
 사용방법을 알아보도록 하겠다.
 
-# 마크다운 사용법 참조용(세미나와 관련없음)
+----
+# 아래내용은 마크다운 사용법 참조용(세미나와 관련없음)
 
 # 제목 1
 ## 제목 2
