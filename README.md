@@ -318,9 +318,9 @@ H2 Database 다운로드 사이트(https://www.h2database.com)
 
 * 데이터베이스 파일 생성 방법
 
-    * jdbc:h2:~/demoshop (접속 창에서 최소 한번 실행하여 db를 생성한다.)
+    * jdbc:h2:&#126;/demoshop (접속 창에서 최소 한번 실행하여 db를 생성한다.)
     * 파일 생성 확인: 윈도우 자신의 계정 폴더에서 demoshop.mv.db
-    * 이후 부터는 jdbc:h2:tcp://localhost/~/demoshop
+    * 이후 부터는 jdbc:h2:tcp://localhost/&#126;/demoshop
 
 [그림 5 H2db 접속]  
 ![h2db_connect](https://user-images.githubusercontent.com/5433728/148383753-c5ca6e6c-6f66-447e-85ab-f7702564b6ab.jpg)
