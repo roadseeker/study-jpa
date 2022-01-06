@@ -1,6 +1,6 @@
-#스프링부트와 JPA 스터디
+# 스프링부트와 JPA 스터디
 
-##준비사항
+## 준비사항
   * 스프링부트 스타터(http://start.spring.io/)
   * 디펜던시: web, thymleaf, jpa, h2, lombok, validation
     * groupId : jpastudy
@@ -52,7 +52,7 @@ test {
 	useJUnitPlatform()
 }
 ```
-##DomoApplication 동작확인
+## DomoApplication 동작확인
 
 앱어플리케이션 실행후 8080포트로 어플리케이션 기동된다. 부트는 최초 기동시 @SpringBootApplication 어노테이션이 있는 
 파일을 확인하여 기동한다. 프로젝트를 생성하게 되면 자동생성되는 파일로 org.springframework.boot:spring-boot-starter-web을 
@@ -118,7 +118,7 @@ public class DemoApplication {
 2022-01-06 19:40:27.563  INFO 7116 --- [  restartedMain] c.i.b.bp.study.jpa.demo.DemoApplication  : Started DemoApplication in 2.405 seconds (JVM running for 4.59)
 
 ```
-##스프링 부트 thymeleaf viewName 매핑
+## 스프링 부트 thymeleaf viewName 매핑
 
 application.properties --> application.yml 파일로 변경 야믈파일이 프로퍼티 파일보다 간결하여 요즘 선호되고 있다.
 yml 파일에 thymeleaf 관련 설정을 등록한다.
@@ -304,7 +304,7 @@ public class HomeController {
 [그림 4] DEMO shop 
 ![home_view](https://user-images.githubusercontent.com/5433728/148380576-b1b7f105-9960-4757-ac8d-b6b4f64f148a.jpg)
 
-##H2 DB 설치
+## H2 DB 설치
 * H2 데이터베이스는 개발이나 테스트용도로 가볍고 편리한 DB
 
 H2 Database 다운로드 사이트(https://www.h2database.com)
