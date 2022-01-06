@@ -1,6 +1,6 @@
 #스프링부트와 JPA 스터디
 
-* 준비사항
+##준비사항
   * 스프링부트 스타터(http://start.spring.io/)
   * 디펜던시: web, thymleaf, jpa, h2, lombok, validation
     * groupId : jpastudy
@@ -11,8 +11,10 @@
 ---
   * [그림 1] 스프링이니셜라이즈 설정된 화면(http://start.spring.io/)
   * ![springio_setting](https://user-images.githubusercontent.com/5433728/148364927-3e907ac5-577e-4ef1-be5c-3619814ee78b.jpg "spring io 설정화면")
-  
-  ADD DEPENDENCIES... 버튼을 클릭해서 디펜던시를 선택하고 GENERATE 버튼을 클릭하여 zip 파일을 다운로드 받습니다. 
+ADD DEPENDENCIES... 버튼을 클릭해서 디펜던시를 선택하고 GENERATE 버튼을 클릭하여 zip 파일을 다운로드 받습니다.
+다운로드 받은 zip 파일을 해제하고 IDE로 임포트하면 그래들 프로젝트가 생성됩니다. 
+  * 
+
 
 ---
   build.graddle Graddle 전체 설정
@@ -50,11 +52,16 @@ test {
 	useJUnitPlatform()
 }
 ```
-* 동작확인
+##DomoApplication 동작확인
 
 앱어플리케이션 실행후 8080포트로 어플리케이션 기동된다. 부트는 최초 기동시 @SpringBootApplication 어노테이션이 있는 
 파일을 확인하여 기동한다. 프로젝트를 생성하게 되면 자동생성되는 파일로 org.springframework.boot:spring-boot-starter-web을 
 디펜던시로 추가하게 되면 톰캣을 기본으로 내장하여 기동하게 된다. 
+
+[그림 2] IDE에 프로젝트 임포트 
+![graddle_project](https://user-images.githubusercontent.com/5433728/148372869-562d1d05-6f23-4152-81ce-a665d6c02cf3.jpg)
+
+부트기동 시 시작지점
 
 ```java
 package com.innotree.bcs.bp.study.jpa.demo;
@@ -73,8 +80,7 @@ public class DemoApplication {
 ```
 
 
-```java
-C:\project\jdk-11.0.12\bin\java.exe -XX:TieredStopAtLevel=1 -noverify -Dspring.output.ansi.enabled=always "-javaagent:C:\Program Files\JetBrains\IntelliJ IDEA 2021.3\lib\idea_rt.jar=5523:C:\Program Files\JetBrains\IntelliJ IDEA 2021.3\bin" -Dcom.sun.management.jmxremote -Dspring.jmx.enabled=true -Dspring.liveBeansView.mbeanDomain -Dspring.application.admin.enabled=true -Dfile.encoding=UTF-8 -classpath C:\project\study\lab2\demo\build\classes\java\main;C:\project\study\lab2\demo\build\resources\main;C:\Users\LG\.gradle\caches\modules-2\files-2.1\org.projectlombok\lombok\1.18.22\9c08ea24c6eb714e2d6170e8122c069a0ba9aacf\lombok-1.18.22.jar;C:\Users\LG\.gradle\caches\modules-2\files-2.1\org.springframework.boot\spring-boot-starter-data-jpa\2.6.2\3eb637ccd03194f1d639b9efed1ff7d73c8592e3\spring-boot-starter-data-jpa-2.6.2.jar;C:\Users\LG\.gradle\caches\modules-2\files-2.1\org.springframework.boot\spring-boot-starter-thymeleaf\2.6.2\fa6c963c2537e5c1c0ed84dd9528062dba30e1a\spring-boot-starter-thymeleaf-2.6.2.jar;C:\Users\LG\.gradle\caches\modules-2\files-2.1\org.springframework.boot\spring-boot-starter-validation\2.6.2\3380b0ca1276496b2af424138db70c621e4a4d5\spring-boot-starter-validation-2.6.2.jar;C:\Users\LG\.gradle\caches\modules-2\files-2.1\org.springframework.boot\spring-boot-starter-web\2.6.2\685b236afc0144a52383cd2c52731dd016f9badd\spring-boot-starter-web-2.6.2.jar;C:\Users\LG\.gradle\caches\modules-2\files-2.1\org.springframework.boot\spring-boot-starter-aop\2.6.2\af16c0de56462ef8a6a9ac63cff30bf5120fc5b3\spring-boot-starter-aop-2.6.2.jar;C:\Users\LG\.gradle\caches\modules-2\files-2.1\org.springframework.boot\spring-boot-starter-jdbc\2.6.2\ff853babf286bf913d73197d0f0b521343d5e8aa\spring-boot-starter-jdbc-2.6.2.jar;C:\Users\LG\.gradle\caches\modules-2\files-2.1\jakarta.transaction\jakarta.transaction-api\1.3.3\c4179d48720a1e87202115fbed6089bdc4195405\jakarta.transaction-api-1.3.3.jar;C:\Users\LG\.gradle\caches\modules-2\files-2.1\jakarta.persistence\jakarta.persistence-api\2.2.3\8f6ea5daedc614f07a3654a455660145286f024e\jakarta.persistence-api-2.2.3.jar;C:\Users\LG\.gradle\caches\modules-2\files-2.1\org.hibernate\hibernate-core\5.6.3.Final\a2420e0a2c9c168c029584aecf6a5b9a2475cd10\hibernate-core-5.6.3.Final.jar;C:\Users\LG\.gradle\caches\modules-2\files-2.1\org.springframework.data\spring-data-jpa\2.6.0\bd08ea8db76c7c82397307dda2e253180c31b7ec\spring-data-jpa-2.6.0.jar;C:\Users\LG\.gradle\caches\modules-2\files-2.1\org.springframework\spring-aspects\5.3.14\bf5de7c1338c2684d834bef8f389ef3d747f9f56\spring-aspects-5.3.14.jar;C:\Users\LG\.gradle\caches\modules-2\files-2.1\org.springframework.boot\spring-boot-starter\2.6.2\c36f1f6886cdbedc5347fdea62b97b44b053b0ba\spring-boot-starter-2.6.2.jar;C:\Users\LG\.gradle\caches\modules-2\files-2.1\org.thymeleaf\thymeleaf-spring5\3.0.14.RELEASE\a0588f30a1e7dcadfc5c260ef6c6078ef377384\thymeleaf-spring5-3.0.14.RELEASE.jar;C:\Users\LG\.gradle\caches\modules-2\files-2.1\org.thymeleaf.extras\thymeleaf-extras-java8time\3.0.4.RELEASE\36e7175ddce36c486fff4578b5af7bb32f54f5df\thymeleaf-extras-java8time-3.0.4.RELEASE.jar;C:\Users\LG\.gradle\caches\modules-2\files-2.1\org.apache.tomcat.embed\tomcat-embed-el\9.0.56\8e4f28f714693ad4e158e61f41371d4e4c6b4e23\tomcat-embed-el-9.0.56.jar;C:\Users\LG\.gradle\caches\modules-2\files-2.1\org.hibernate.validator\hibernate-validator\6.2.0.Final\d6b0760dfffbf379cedd02f715ff4c9a2e215921\hibernate-validator-6.2.0.Final.jar;C:\Users\LG\.gradle\caches\modules-2\files-2.1\org.springframework.boot\spring-boot-starter-json\2.6.2\c0d457ff259c487521706fd2efac75d61595d527\spring-boot-starter-json-2.6.2.jar;C:\Users\LG\.gradle\caches\modules-2\files-2.1\org.springframework.boot\spring-boot-starter-tomcat\2.6.2\81bc9a57c0df9787e122c3b2a66e5a1ac0e139a5\spring-boot-starter-tomcat-2.6.2.jar;C:\Users\LG\.gradle\caches\modules-2\files-2.1\org.springframework\spring-webmvc\5.3.14\beb6dc57abf6685878b824d8ab0af39ebd1cfbae\spring-webmvc-5.3.14.jar;C:\Users\LG\.gradle\caches\modules-2\files-2.1\org.springframework\spring-web\5.3.14\801d96f3914ace2e347ee3f6d29e21073e4f50ed\spring-web-5.3.14.jar;C:\Users\LG\.gradle\caches\modules-2\files-2.1\org.springframework\spring-aop\5.3.14\f049146a55991e89c0f04b9624f1f69e1763d80f\spring-aop-5.3.14.jar;C:\Users\LG\.gradle\caches\modules-2\files-2.1\org.aspectj\aspectjweaver\1.9.7\158f5c255cd3e4408e795b79f7c3fbae9b53b7ca\aspectjweaver-1.9.7.jar;C:\Users\LG\.gradle\caches\modules-2\files-2.1\com.zaxxer\HikariCP\4.0.3\107cbdf0db6780a065f895ae9d8fbf3bb0e1c21f\HikariCP-4.0.3.jar;C:\Users\LG\.gradle\caches\modules-2\files-2.1\org.springframework\spring-jdbc\5.3.14\f209e8d165dbcfc018aa4f741fbe75844eb45ff8\spring-jdbc-5.3.14.jar;C:\Users\LG\.gradle\caches\modules-2\files-2.1\org.hibernate.common\hibernate-commons-annotations\5.1.2.Final\e59ffdbc6ad09eeb33507b39ffcf287679a498c8\hibernate-commons-annotations-5.1.2.Final.jar;C:\Users\LG\.gradle\caches\modules-2\files-2.1\org.jboss.logging\jboss-logging\3.4.2.Final\e517b8a93dd9962ed5481345e4d262fdd47c4217\jboss-logging-3.4.2.Final.jar;C:\Users\LG\.gradle\caches\modules-2\files-2.1\net.bytebuddy\byte-buddy\1.11.22\8b4c7fa5562a09da1c2a9ab0873cb51f5034d83f\byte-buddy-1.11.22.jar;C:\Users\LG\.gradle\caches\modules-2\files-2.1\antlr\antlr\2.7.7\83cd2cd674a217ade95a4bb83a8a14f351f48bd0\antlr-2.7.7.jar;C:\Users\LG\.gradle\caches\modules-2\files-2.1\org.jboss\jandex\2.2.3.Final\d3865101f0666b63586683bd811d754517f331ab\jandex-2.2.3.Final.jar;C:\Users\LG\.gradle\caches\modules-2\files-2.1\com.fasterxml\classmate\1.5.1\3fe0bed568c62df5e89f4f174c101eab25345b6c\classmate-1.5.1.jar;C:\Users\LG\.gradle\caches\modules-2\files-2.1\org.glassfish.jaxb\jaxb-runtime\2.3.5\a169a961a2bb9ac69517ec1005e451becf5cdfab\jaxb-runtime-2.3.5.jar;C:\Users\LG\.gradle\caches\modules-2\files-2.1\org.springframework\spring-context\5.3.14\ce6042492f042131f602bdc83fcb412b142bdac5\spring-context-5.3.14.jar;C:\Users\LG\.gradle\caches\modules-2\files-2.1\org.springframework\spring-orm\5.3.14\5ec15c098a56205ff77c7792e9dad30f5be16b5a\spring-orm-5.3.14.jar;C:\Users\LG\.gradle\caches\modules-2\files-2.1\org.springframework.data\spring-data-commons\2.6.0\5a9afaa6e0a4cd74183a794f467c9b4a546b4cbe\spring-data-commons-2.6.0.jar;C:\Users\LG\.gradle\caches\modules-2\files-2.1\org.springframework\spring-tx\5.3.14\3d80a1e051f071e9cd42fc99698bf9022862b5c\spring-tx-5.3.14.jar;C:\Users\LG\.gradle\caches\modules-2\files-2.1\org.springframework\spring-beans\5.3.14\24cc27af89edc1581a57bb15bc160d2353f40a0e\spring-beans-5.3.14.jar;C:\Users\LG\.gradle\caches\modules-2\files-2.1\org.springframework\spring-core\5.3.14\d87ad19f9d8b9a3f1a143db5a2be34c61751aaa2\spring-core-5.3.14.jar;C:\Users\LG\.gradle\caches\modules-2\files-2.1\org.slf4j\slf4j-api\1.7.32\cdcff33940d9f2de763bc41ea05a0be5941176c3\slf4j-api-1.7.32.jar;C:\Users\LG\.gradle\caches\modules-2\files-2.1\org.springframework.boot\spring-boot-autoconfigure\2.6.2\7c91bce101d3f796cccbc1a6744c1ea389fff73f\spring-boot-autoconfigure-2.6.2.jar;C:\Users\LG\.gradle\caches\modules-2\files-2.1\org.springframework.boot\spring-boot\2.6.2\bbf59f411320da665411692359ff511315d0ff91\spring-boot-2.6.2.jar;C:\Users\LG\.gradle\caches\modules-2\files-2.1\org.springframework.boot\spring-boot-starter-logging\2.6.2\58d4896c606b6ff07b9bd8e46c87eac5a51255de\spring-boot-starter-logging-2.6.2.jar;C:\Users\LG\.gradle\caches\modules-2\files-2.1\jakarta.annotation\jakarta.annotation-api\1.3.5\59eb84ee0d616332ff44aba065f3888cf002cd2d\jakarta.annotation-api-1.3.5.jar;C:\Users\LG\.gradle\caches\modules-2\files-2.1\org.yaml\snakeyaml\1.29\6d0cdafb2010f1297e574656551d7145240f6e25\snakeyaml-1.29.jar;C:\Users\LG\.gradle\caches\modules-2\files-2.1\org.thymeleaf\thymeleaf\3.0.14.RELEASE\5ec84717bf76bcbcc133f9f19bab754f97b92f8\thymeleaf-3.0.14.RELEASE.jar;C:\Users\LG\.gradle\caches\modules-2\files-2.1\jakarta.validation\jakarta.validation-api\2.0.2\5eacc6522521f7eacb081f95cee1e231648461e7\jakarta.validation-api-2.0.2.jar;C:\Users\LG\.gradle\caches\modules-2\files-2.1\com.fasterxml.jackson.datatype\jackson-datatype-jsr310\2.13.1\1ece5a87b59701328215e0083448b4d451857cbd\jackson-datatype-jsr310-2.13.1.jar;C:\Users\LG\.gradle\caches\modules-2\files-2.1\com.fasterxml.jackson.module\jackson-module-parameter-names\2.13.1\cbeec2259213c555ef451a2e05f35ed1dbfbf799\jackson-module-parameter-names-2.13.1.jar;C:\Users\LG\.gradle\caches\modules-2\files-2.1\com.fasterxml.jackson.datatype\jackson-datatype-jdk8\2.13.1\8ecfa9bcd714269fdf22c33f9fd00d0643bd0e21\jackson-datatype-jdk8-2.13.1.jar;C:\Users\LG\.gradle\caches\modules-2\files-2.1\com.fasterxml.jackson.core\jackson-databind\2.13.1\698b2d2b15d9a1b7aae025f1d9f576842285e7f6\jackson-databind-2.13.1.jar;C:\Users\LG\.gradle\caches\modules-2\files-2.1\org.apache.tomcat.embed\tomcat-embed-websocket\9.0.56\d84be683a5d47e820d077db1d511181c7db9e4e9\tomcat-embed-websocket-9.0.56.jar;C:\Users\LG\.gradle\caches\modules-2\files-2.1\org.apache.tomcat.embed\tomcat-embed-core\9.0.56\7c8e0008564c644beec976ab115e2670bb4d7003\tomcat-embed-core-9.0.56.jar;C:\Users\LG\.gradle\caches\modules-2\files-2.1\org.springframework\spring-expression\5.3.14\5cd4c568522b7084afac5d2ac6cb945b797b3f16\spring-expression-5.3.14.jar;C:\Users\LG\.gradle\caches\modules-2\files-2.1\jakarta.xml.bind\jakarta.xml.bind-api\2.3.3\48e3b9cfc10752fba3521d6511f4165bea951801\jakarta.xml.bind-api-2.3.3.jar;C:\Users\LG\.gradle\caches\modules-2\files-2.1\org.glassfish.jaxb\txw2\2.3.5\ec8930fa62e7b1758b1664d135f50c7abe86a4a3\txw2-2.3.5.jar;C:\Users\LG\.gradle\caches\modules-2\files-2.1\com.sun.istack\istack-commons-runtime\3.0.12\cbbe1a62b0cc6c85972e99d52aaee350153dc530\istack-commons-runtime-3.0.12.jar;C:\Users\LG\.gradle\caches\modules-2\files-2.1\org.springframework\spring-jcl\5.3.14\ffcf745ed5ba32930771378316fd08e97986bec2\spring-jcl-5.3.14.jar;C:\Users\LG\.gradle\caches\modules-2\files-2.1\ch.qos.logback\logback-classic\1.2.9\7d495522b08a9a66084bf417e70eedf95ef706bc\logback-classic-1.2.9.jar;C:\Users\LG\.gradle\caches\modules-2\files-2.1\org.apache.logging.log4j\log4j-to-slf4j\2.17.0\e50b82411b9ce9c204c938509f914b2bb887168b\log4j-to-slf4j-2.17.0.jar;C:\Users\LG\.gradle\caches\modules-2\files-2.1\org.slf4j\jul-to-slf4j\1.7.32\8a055c04ab44e8e8326901cadf89080721348bdb\jul-to-slf4j-1.7.32.jar;C:\Users\LG\.gradle\caches\modules-2\files-2.1\org.attoparser\attoparser\2.0.5.RELEASE\a93ad36df9560de3a5312c1d14f69d938099fa64\attoparser-2.0.5.RELEASE.jar;C:\Users\LG\.gradle\caches\modules-2\files-2.1\org.unbescape\unbescape\1.1.6.RELEASE\7b90360afb2b860e09e8347112800d12c12b2a13\unbescape-1.1.6.RELEASE.jar;C:\Users\LG\.gradle\caches\modules-2\files-2.1\com.fasterxml.jackson.core\jackson-annotations\2.13.1\1cbcbe4623113e6af92ccaa89884a345270f1a87\jackson-annotations-2.13.1.jar;C:\Users\LG\.gradle\caches\modules-2\files-2.1\com.fasterxml.jackson.core\jackson-core\2.13.1\51ae921a2ed1e06ca8876f12f32f265e83c0b2b8\jackson-core-2.13.1.jar;C:\Users\LG\.gradle\caches\modules-2\files-2.1\ch.qos.logback\logback-core\1.2.9\cdaca0cf922c5791a8efa0063ec714ca974affe3\logback-core-1.2.9.jar;C:\Users\LG\.gradle\caches\modules-2\files-2.1\org.apache.logging.log4j\log4j-api\2.17.0\bbd791e9c8c9421e45337c4fe0a10851c086e36c\log4j-api-2.17.0.jar;C:\Users\LG\.gradle\caches\modules-2\files-2.1\org.springframework.boot\spring-boot-devtools\2.6.2\2f766b028fcb09d6b3fec1f17bcc19b96ff4ebce\spring-boot-devtools-2.6.2.jar;C:\Users\LG\.gradle\caches\modules-2\files-2.1\com.h2database\h2\1.4.200\f7533fe7cb8e99c87a43d325a77b4b678ad9031a\h2-1.4.200.jar;C:\Users\LG\.gradle\caches\modules-2\files-2.1\com.sun.activation\jakarta.activation\1.2.2\74548703f9851017ce2f556066659438019e7eb5\jakarta.activation-1.2.2.jar com.innotree.bcs.bp.study.jpa.demo.DemoApplication
+```
 19:40:25.144 [Thread-0] DEBUG org.springframework.boot.devtools.restart.classloader.RestartClassLoader - Created RestartClassLoader org.springframework.boot.devtools.restart.classloader.RestartClassLoader@7be702c1
 
   .   ____          _            __ _ _
@@ -112,6 +118,261 @@ C:\project\jdk-11.0.12\bin\java.exe -XX:TieredStopAtLevel=1 -noverify -Dspring.o
 2022-01-06 19:40:27.563  INFO 7116 --- [  restartedMain] c.i.b.bp.study.jpa.demo.DemoApplication  : Started DemoApplication in 2.405 seconds (JVM running for 4.59)
 
 ```
+##스프링 부트 thymeleaf viewName 매핑
+
+application.properties --> application.yml 파일로 변경 야믈파일이 프로퍼티 파일보다 간결하여 요즘 선호되고 있다.
+yml 파일에 thymeleaf 관련 설정을 등록한다.
+
+resources:templates/ +{ViewName}+ .html 와 같이 뷰를 호출할 수 있도록 설정된다. ViewName이 home으로 지정되는 경우 
+다음과 같이 변경되어 호출된다. resources:templates/home.html
+
+````yaml
+spring:
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+
+````
+[그림 3] 프로젝트 구조
+![project_structure](https://user-images.githubusercontent.com/5433728/148375886-e966c17e-874b-4a56-b360-5ab0b802fa57.jpg)
+
+* 타임리프 템플릿 등록 
+1. home.html 
+
+```html
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/header :: header">
+    <title>Hello</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+</head>
+<body>
+<div class="container">
+    <div th:replace="fragments/bodyHeader :: bodyHeader" />
+    <div class="jumbotron">
+        <h1>HELLO SHOP</h1>
+        <p class="lead">회원 기능</p>
+        <p>
+            <a class="btn btn-lg btn-secondary" href="/members/new">회원 가입</a>
+            <a class="btn btn-lg btn-secondary" href="/members">회원 목록</a>
+        </p>
+        <p class="lead">상품 기능</p>
+        <p>
+            <a class="btn btn-lg btn-dark" href="/items/new">상품 등록</a>
+            <a class="btn btn-lg btn-dark" href="/items">상품 목록</a>
+        </p>
+        <p class="lead">주문 기능</p>
+        <p>
+            <a class="btn btn-lg btn-info" href="/order">상품 주문</a>
+            <a class="btn btn-lg btn-info" href="/orders">주문 내역</a>
+        </p>
+    </div>
+    <div th:replace="fragments/footer :: footer" />
+</div> <!-- /container -->
+```
+2. templates/header
+```html
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="header">
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrinkto-
+fit=no">
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+  <!-- Custom styles for this template -->
+  <link href="/css/jumbotron-narrow.css" rel="stylesheet">
+  <title>Hello, world!</title>
+</head>
+```
+3. templates/bodyheader
+````html
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<div class="header" th:fragment="bodyHeader">
+    <ul class="nav nav-pills pull-right">
+        <li><a href="/">Home</a></li>
+    </ul>
+    <a href="/"><h3 class="text-muted">HELLO SHOP</h3></a>
+</div>
+````
+
+4. templates/footer
+```html
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<div class="footer" th:fragment="footer">
+    <p>&copy; Hello Shop V2</p>
+</div>
+```
+5. resources/static/css/jumbotron-narrow.css 추가
+````css
+/* Space out content a bit */
+body {
+    padding-top: 20px;
+    padding-bottom: 20px;
+}
+/* Everything but the jumbotron gets side spacing for mobile first views */
+.header,
+.marketing,
+.footer {
+    padding-left: 15px;
+    padding-right: 15px;
+}
+/* Custom page header */
+.header {
+    border-bottom: 1px solid #e5e5e5;
+}
+/* Make the masthead heading the same height as the navigation */
+.header h3 {
+    margin-top: 0;
+    margin-bottom: 0;
+    line-height: 40px;
+    padding-bottom: 19px;
+}
+/* Custom page footer */
+.footer {
+    padding-top: 19px;
+    color: #777;
+    border-top: 1px solid #e5e5e5;
+}
+/* Customize container */
+@media (min-width: 768px) {
+    .container {
+        max-width: 1200px;
+    }
+}
+.container-narrow > hr {
+    margin: 30px 0;
+}
+/* Main marketing message and sign up button */
+.jumbotron {
+    text-align: center;
+    border-bottom: 1px solid #e5e5e5;
+}
+.jumbotron .btn {
+    font-size: 21px;
+    padding: 14px 24px;
+}
+/* Supporting marketing content */
+.marketing {
+    margin: 40px 0;
+}
+.marketing p + h4 {
+    margin-top: 28px;
+}
+/* Responsive: Portrait tablets and up */
+@media screen and (min-width: 768px) {
+    /* Remove the padding we set earlier */
+    .header,
+    .marketing,
+    .footer {
+        padding-left: 0;
+        padding-right: 0;
+    }
+    /* Space out the masthead */
+    .header {
+        margin-bottom: 30px;
+    }
+    /* Remove the bottom border on the jumbotron for visual effect */
+    .jumbotron {
+        border-bottom: 0;
+    }
+}
+````
+* HomeController 코딩
+```java
+package com.innotree.bcs.bp.study.jpa.demo.web.controller;
+
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+
+@Controller
+@Slf4j
+public class HomeController {
+    @GetMapping(value = "/")
+    public String home(Model model){
+        log.info("home controller");
+        return "home";
+    }
+}
+```
+* 화면 확인
+[그림 4] DEMO shop 
+![home_view](https://user-images.githubusercontent.com/5433728/148380576-b1b7f105-9960-4757-ac8d-b6b4f64f148a.jpg)
+
+##H2 DB 설치
+* H2 데이터베이스는 개발이나 테스트용도로 가볍고 편리한 DB
+
+H2 Database 다운로드 사이트(https://www.h2database.com)
+최신버전을 다운로드 받아서 사용한다. 현재는 2.0.206(2022-01-04) 버전이다.
+링크: https://github.com/h2database/h2database/releases/download/version-2.0.206/h2-2022-01-04.zip
+
+다운받은 후 원하는 위치에 압축을 풀고 ./h2/bin 디렉토리의 h2.bat을 실행한다.(리눅스: h2.sh)
+실행 후 웹브라우저가 자동실행되어 접속설정창이 열린다.(http://192.168.1.1:8082/login.do)
+* 데이터베이스 파일 생성 방법
+
+jdbc:h2:~/demoshop (최소 한번)
+파일 생성 확인: 윈도우 자신의 계정 폴더에서 demoshop.mv.db 
+이후 부터는 jdbc:h2:tcp://localhost/~/demoshop
+
+[그림 5 H2db 접속]  
+![h2db_connect](https://user-images.githubusercontent.com/5433728/148383753-c5ca6e6c-6f66-447e-85ab-f7702564b6ab.jpg)
+
+[그림 5 H2db 개발환경]
+![h2database](https://user-images.githubusercontent.com/5433728/148383560-21dfbecf-dbaf-4823-84cd-58fe706fbae2.jpg)
+
+* JPA와 DB연결 설정 및 동작 확인
+
+application.yml 설정
+```yaml
+spring:
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+  datasource:
+    url: jdbc:h2:tcp://localhost/~/demoshop
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create
+    properties:
+      hibernate:
+        format_sql: true
+logging:
+  level:
+    org.hibernate.SQL: debug
+```
+* spring.jpa.hibernate.ddl-auto: create  이 옵션은 애플리케이션 실행 시점에 테이블을 drop 하고, 다시 생성한다.
+
+* org.hibernate.SQL: true 옵션은 logger를 통해 하이버네이트 실행 SQL을 남긴다.
+
+잘 작동되는지를 확인하기 위해 회원엔티티, 회원레포지토리를 작성하고 테스트를 수행한다.
+
+
+1. 회원엔티티
+```java
+
+```
+2. 회원레포지토리
+```java
+
+```
+3. 테스트
+````java
+
+````
+
+지금까지가 스프링부트환경에서 JPA demo를 개발하기 위한 환경 구성이다.
+
+앞으로는 고객의 요구사항을 분석하여 도메인을 설계하고 도메인을 바탕으로 JPA이용하여 간단한 기능을 구헌하면서 JPA 구조와
+사용방법을 알아보도록 하겠다.
+
 
 
 # 제목 1
