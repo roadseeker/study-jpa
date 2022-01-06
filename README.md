@@ -4,18 +4,19 @@
   * 스프링부트 스타터(http://start.spring.io/)를 이용해서 프로젝트 생성한다
     * java: 11
     * IDE: 편한것(Eclips, InteliJ)
-    * 디펜던시: web, thymleaf, jpa, h2, lombok, validation
+    * 디펜던시: web, thymeleaf, jpa, h2, lombok, validation
       * groupId : com.innotree.bcs.bp.study.jpa
       * artifactId: demo
     * 스프링부트: 2.6.2 
     * Gradle Project
     * Packaging: Jar
 ---
-  * [그림 1] 스프링이니셜라이즈 설정된 화면(http://start.spring.io/)
+  * [그림 1] 스프링이니셜라이즈 설정 화면(http://start.spring.io/)
 
 ![springio_setting](https://user-images.githubusercontent.com/5433728/148364927-3e907ac5-577e-4ef1-be5c-3619814ee78b.jpg "spring io 설정화면")
 
-**ADD DEPENDENCIES...** 버튼을 클릭해서 디펜던시를 선택하고 **GENERATE** 버튼을 클릭하여 zip 파일을 다운로드 받습니다.
+**ADD DEPENDENCIES...** 버튼을 클릭해서 web, developer tools, jpa, h2, lombok, thymeleaf
+디펜던시를 선택하고 **GENERATE** 버튼을 클릭하여 zip 파일을 다운로드 받는다.
 다운로드 받은 zip 파일을 해제하고 IDE로 임포트하면 그래들 프로젝트가 만들어진다. 
 
 ---
@@ -56,13 +57,48 @@ test {
 ## DomoApplication 동작확인
 
 앱어플리케이션 실행후 8080포트로 어플리케이션 기동된다. 부트는 최초 기동시 @SpringBootApplication 어노테이션이 있는 
-파일을 확인하여 기동한다. 프로젝트를 생성하게 되면 자동생성되는 파일로 org.springframework.boot:spring-boot-starter-web을 
-디펜던시로 추가하게 되면 톰캣을 기본으로 내장하여 기동하게 된다. 
+파일을 확인하여 기동한다. 
+
+org.springframework.boot:spring-boot-starter-web을 디펜던시로 추가하게 되면 톰캣을 기본으로 내장하여 기동하게 되어
+웹환경에서 개발을 진행할 수 없다.
+
+### Spring Boot의 장점
+1) 라이브러리 관리 자동화
+- 기존 스프링 자바 프로젝트에서는 메이븐이나 그래들을 이용해서 라이브러리 의존성을 관리해왔다. 
+- 하지만 스프링 부트에서는 스타터(Starter)라는 것을 이용해 특정 기능에 필요한 라이브러리 의존성을 더욱 간단히 처리 할 수 있다.
+
+2) 설정의 자동화
+- 스프링 부트에서는 프로젝트에 추가된 라이브러리를 기반으로 실행에 필요한 환경을 자동으로 설정해준다.
+- 개발에 필요한 라이브러리들을 추가하면 스픵 부트가 이 라이브러리들을 인지해서 관련된 스프링 설정을 자동으로 
+처리해주기 때문에 **개발자들은 복잡한 설정을 하지 않고도 개발**이 가능하다.
+
+
+3) 라이브러리 버전 자동 관리
+- 개발시 가장 신경쓰이는 부분이 라이브러리와 버젼 관리이다. 기존의 스프링은 스프링 라이브러리만 사용하여 개발할 수 없으며, 
+의존관계에 있는 서드파티 라이브러들도 사용한다. 스프링 부트를 사용하면 스프링 부트 버전에 해당하는 스프링 라이브러리뿐만 아니라 
+서드파티 라이브러리들도 호환되는 버전으로 다운로드해준다.
+- 라이브러리 버전이 달라 정상적으로 동작하지 않는 상황을 겪을 필요가 없고, XML설정을 이용해서 라이브러리를 매번 설정하는
+과정을 줄이고 **개발에만 집중할 수 있는 환경**을 제공한다.
+
+
+4) 테스트 환경과 내장 Tomcat
+- JUnit을 비롯한 테스트 관련 라이브러리들이 기본적으로 포함되어 있기 때문에 컨트롤러를 비롯한 다양한 계층의 클래스들에 
+대해서 테스트 케이스를 쉽게 작성할 수 있다.
+- Tomcat 서버를 내장하고 있기 때문에 단지 main() 메소드를 가진 클래스를 실행하는 방식으로 서버를 구동하기 때문에 
+실행결과를 빠르게 확인할 수 있다.
+
+
+5) 독립적으로 실행 가능한 JAR
+- 애플리케이션을 개발하고 테스트까지 마쳤으면 애플리케이션을 실제 운영 서버에 배포하기 위해서 패키징을 해야하는데, 
+프로젝트가 일반 자바 프로젝트라면 간단하게 JAR파일로 패키징하면 되지만 웹 프로젝트라면 WAR 파일로 패키징 해야한다.
+
+- 스프링 부트는 독립적으로 실행 가능한 애플리케이션을 빠르게 개발하는 것을 목표로 하기 때문에 웹 애플리케이션도 WAR가 아닌 
+**JAR파일로 패키징 하여 사용**할 수 있다.
 
 [그림 2] IDE에 프로젝트 임포트 
 ![graddle_project](https://user-images.githubusercontent.com/5433728/148372869-562d1d05-6f23-4152-81ce-a665d6c02cf3.jpg)
 
-부트기동 시 시작지점
+* 부트기동
 
 ```java
 package com.innotree.bcs.bp.study.jpa.demo;
