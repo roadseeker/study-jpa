@@ -1,18 +1,18 @@
+
+# _앞으로의 계획_
+1. _스프링부트와 JPA_ <- 금번 세미나
+2. _스프링부트와 RestAPI 개발_
+    - _SpringBoot, JPA, thymeleaf 개발된 소스를 RestAPI 변환_
+3. _Spring Data JPA와 QureyDSL적용_
+   - _SpringBoot와 JPA로 개발된 소스를 가지고 Spring Data JPA와 QureyDSL적용_
+4. _마이크로 서비스 개발_
+    - _Spring boot, Spring Data JPA, RestAPI로 개발된 소스를 마이크로서비스 전환_
+5. _Docker와 Kuberneties_
+    - _마이크로 서비스로 개발 된 내용을 Docker와 Kubeneties 환경으로 구현_
+   
 # 스프링부트와 JPA 스터디
 
-_세미나 자료는 김영환님(인프런 JPA 강의자)의 자료를 참조하여 작성하였습니다._
-
-_앞으로의 계획_
-1. _스프링부트와 JPA_ <- 금번 세미나
-2. _스프링부트와 RestAPI 개발_ 
-   - _스프링부트와 JPA로 개발된 내용을 RestAPI로 어떻게 변환해야 좋은 API 설계인지 확인_
-3. _스프링 데이타 JAP와 QureyDSL적용_
-4. _마이크로 서비스 개발_
-   - _Spring boot, Spring Data JPA, RestAPI로 개발된 내용을 마이크로서비스 전환_
-5. _Docker와 Kuberneties_ 
-   - _마이크로 서비스로 개발 된 내용을 Docker와 Kubeneties 환경으로 구현_ 
-   
-
+_스프링부트와 JPA 스터디 세미나 자료는 김영환님(인프런 JPA 강의자)의 자료를 참조하여 작성하였습니다._
 
 ## 준비사항
   * 스프링부트 스타터(http://start.spring.io/)를 이용해서 프로젝트 생성한다
