@@ -10,7 +10,7 @@ _앞으로의 계획_
 4. _마이크로 서비스 개발_
    - _Spring boot, Spring Data JPA, RestAPI로 개발된 내용을 마이크로서비스 전환_
 5. _Docker와 Kuberneties_ 
-   - _마이크로 서비스로 개발 된 내용을 Docker와 Kubeneties 환경으로 구현_
+   - _마이크로 서비스로 개발 된 내용을 Docker와 Kubeneties 환경으로 구현_ 
    
 
 
