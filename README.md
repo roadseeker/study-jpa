@@ -714,16 +714,51 @@ public class Member {
 ##### SEQUENCE - @SequenceGenerator
 
 
-| 속성                      |                              설명                              | 기본값 |
-|-------------------------|:------------------------------------------------------------:|:----|
-| `name`                  |                          식별자 생성기 이름                          | 필수  |
-| `sequenceName`          |                    데이터베이스에 등록되어 있는 시퀀스 이름                    ||
-| `initialValue`          |      DDL 생성 시에만 사용됨, 시퀀스 DDL을 생성할 때 처음 1로 시작하는 수를 지정한다.      ||
-| `unique(DDL)`           |  ||
-| `colunmDefinition(DDL)` | 데이터베이스 컬럼정보를 직접 줄수 있다<br/>ex) varchar(100), default 'EMPTY'  |     |
-| `length(DDL)`           |                문자 길이 제약조건, String 타입에만 사용한다.                 | 255 |
+| 속성                |                                                      설명                                                      | 기본값 |
+|-------------------|:------------------------------------------------------------------------------------------------------------:|:----|
+| `name`            |                                                  식별자 생성기 이름                                                  | 필수  |
+| `sequenceName`    |                                            데이터베이스에 등록되어 있는 시퀀스 이름                                            ||
+| `initialValue`    |                              DDL 생성 시에만 사용됨, 시퀀스 DDL을 생성할 때 처음 1로 시작하는 수를 지정한다.                              ||
+| `allocationSize`  | 시퀀스 한번 호출에 증가하는 수(시퀀스를 얻기위한 호출을 줄여 성능 최적화하기 위한 방안) <br/> 데이터베이스 시퀀스 값이 하나씩 증가하도록 설정되어 있으면 이겺을 반드시 1로 설정야 한다. | 1   |
+| `catalog, schema` |                                          데이타베이스 catalog, schema 이름                                           | 50  |
 
 
+##### TABLE 전략
+* 키 생성 전용 테이블을 하나 만들어서 데이터베이스 시퀀스를 흉내내는 전략
+* 장점: 모든 데이터베이스에 적용 가능
+* 단점: 성능
+##### TABLE 전략 - 매핑
+```sql
+create table MY_SEQUENCES (
+    sequence_name varchar(255) not null,
+    next_val bigint,
+    primary key ( sequence_name )
+)
+```
+````java
+package com.innotree.bcs.bp.study.jpa.demo.member.domain;
+
+import lombok.Getter;
+import lombok.Setter;
+
+import javax.persistence.*;
+import java.util.Date;
+
+
+@Entity
+@TableGenerator(
+        name = "MEMBER_SEQ_GENERATOR",
+        table = "MY_SEQUENCES",
+        pkColumnValue = "MEMBER_SEQ", allocationSize = 1)
+@Getter @Setter
+public class Member {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.TABLE,
+            generator = "MEMBER_SEQ_GENERATOR")
+    private Long id;
+}
+````
 
 #### 매핑 어노테이션 정리
 | 어노테이션|            설정            |
@@ -748,9 +783,64 @@ public class Member {
 | `length(DDL)`                   |                                                                문자 길이 제약조건, String 타입에만 사용한다.                                                                 | 255                        |
 | `precision, scale(DDL)`         | BigDecimal 타입에서 사용한다(BigInteger도 사용할 수 있다). precision은 소수점을 포함한 전체 자릿수를, scale은 소수의 자릿수다. 참고로 double, float 타입에는 적용되지 않는다. 아주 큰 숫자나 정밀한 소수를 다루어야 할 때만 사용한다.  | precision=19, <br/>scale=2 |
 
+### 다양한 연관관계 매핑
+* 연관관계 매핑 시 고려사항 3가지
+* 다대일[N:1]
+* 일대다[1:N]
+* 일대일[1:1]
+* 다대다[N:M]
+#### 연관관계 매핑시 고려사항 3가지
+* 다중성
+* 단방향, 양방향
+* 연관관계 주인
+##### 다중성
+* 다대일 @ManyToOne
+* 일대다 @OneToMany
+* 일대일 @OneToOne
+* 다대다 @ManyToMany
+##### 단방향, 양방향
+* 테이블
+  * 외래키 하나로 양쪽 조인 가능
+* 객체
+  * 참조용 필드가 있는 쪽으로만 참조 가능
+  * 한쪽만 참조하면 단방향
+  * 양쪽이 서로 참조하면 양방향
+```java
+@Entity
+@Getter @Setter
+public class Member {
+
+    @Id @GeneratedValue
+    @Column(name = "member_id")
+    private Long id;
+
+    @Column(name = "name")
+    private String username;
+
+    private Integer age;
+
+    @OneToMany(mappedBy = "member")
+    private List<Order> orders = new ArrayList<>(); //주문객체참조
+}
+```
+```java
+
+@Entity
+@Setter @Getter
+public class Order {
+    @Id
+    @Column(name = "order_id")
+    private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "member_id")
+    private Member member; //회원객체참조
+}
+```
 
 
-스프링부트에서는 JPA(
+
+
 
 앞으로는 고객의 요구사항을 분석하여 도메인을 설계하고 도메인을 바탕으로 JPA이용하여 기능을 구헌하면서 JPA 구조와
 사용방법을 알아보도록 하겠다.
@@ -819,16 +909,197 @@ public class Member {
 
 **주소(Address):** 값 타입(임베디드 타입)이다. 회원과 배송(Delivery)에서 사용한다.
 
-## Domain 구현 -작성중
+## Domain 구현 
 ### 회원 Domain 구현
 #### 구현기능
 * 회원 등록
 * 회원 목록 조회
 #### 순서
 * 회원 엔티티 개발
+1. Member Entity
+
+````java
+package com.innotree.bcs.bp.study.jpa.demo.member.domain;
+
+import com.innotree.bcs.bp.study.jpa.demo.order.domain.Order;
+import lombok.Getter;
+import lombok.Setter;
+
+import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
+
+@Entity
+@Getter @Setter
+public class Member {
+
+    @Id
+    @GeneratedValue
+    @Column(name = "member_id")
+    private Long id;
+    private String name;
+    @Embedded
+    private Address address;
+
+    @OneToMany(mappedBy = "member")
+    private List<Order> orders = new ArrayList<>();
+}
+
+````
+2. Address
+```java
+package com.innotree.bcs.bp.study.jpa.demo.member.domain;
+
+import lombok.Getter;
+
+import javax.persistence.Embeddable;
+
+@Embeddable
+@Getter
+public class Address {
+    private String city;
+    private String street;
+    private String zipcode;
+
+    protected Address() {}
+
+    public Address(String city, String street, String zipcode) {
+        this.city = city;
+        this.street = street;
+        this.zipcode = zipcode;
+    }
+
+```
 * 회원 레포지토리 개발
+```java
+package com.innotree.bcs.bp.study.jpa.demo.member.repository;
+
+import com.innotree.bcs.bp.study.jpa.demo.member.domain.Member;
+import org.springframework.stereotype.Repository;
+
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import java.util.List;
+
+@Repository
+public class MemberRepository {
+    @PersistenceContext
+    private EntityManager entityManager;
+
+    public void save(Member member) {
+        entityManager.persist(member);
+    }
+
+    public Member findOne(Long id) {
+        return entityManager.find(Member.class, id);
+    }
+
+    public List<Member> findAll() {
+        return entityManager.createQuery("SELECT m FROM Member m", Member.class).getResultList();
+    }
+
+    public List<Member> findByName(String name) {
+        return entityManager.createQuery("select m from Member m where m.name = :name",
+                Member.class).setParameter("name", name).getResultList();
+    }
+}
+
+```
 * 회원 서비스 개발
+```java
+package com.innotree.bcs.bp.study.jpa.demo.member.service;
+
+import com.innotree.bcs.bp.study.jpa.demo.member.domain.Member;
+import com.innotree.bcs.bp.study.jpa.demo.member.repository.MemberRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+@Service
+@Transactional(readOnly = true)
+@RequiredArgsConstructor
+public class MemberService {
+    private final MemberRepository repository;
+
+    @Transactional
+    public Long join(Member member) {
+        validateDuplicateMember(member);
+        repository.save(member);
+        return member.getId();
+    }
+
+    public List<Member> findMembers() {
+        return repository.findAll();
+    }
+
+    public Member findOne(Long id) {
+        return repository.findOne(id);
+    }
+
+    private void validateDuplicateMember(Member member) {
+        List<Member> findMembers = repository.findByName(member.getName());
+        if(!findMembers.isEmpty())
+            throw new IllegalStateException("이미 존재하는 회원입니다");
+    }
+}
+
+```
 * 회원 기능 테스트 코드 구현
+```java
+package com.innotree.bcs.bp.study.jpa.demo.member.service;
+
+import com.innotree.bcs.bp.study.jpa.demo.member.domain.Member;
+import com.innotree.bcs.bp.study.jpa.demo.member.repository.MemberRepository;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+@SpringBootTest
+@Transactional
+class MemberServiceTest {
+
+    @Autowired
+    MemberService memberService;
+    @Autowired
+    MemberRepository memberRepository;
+
+    @Test
+    @DisplayName(value = "회원가입")
+    public void join() {
+        Member member = new Member();
+        member.setName("이경익");
+
+        Long saveId = memberService.join(member);
+
+        assertThat(member).isEqualTo(memberRepository.findOne(saveId));
+    }
+
+    @Test
+    @DisplayName("중복회원예외발생")
+    public void duplicateMember() {
+        //Given
+        Member member1 = new Member();
+        member1.setName("이경익");
+        Member member2 = new Member();
+        member2.setName("이경익");
+
+        //When
+        memberService.join(member1);
+
+        //Then
+        assertThrows(IllegalStateException.class, () -> {
+            memberService.join(member2);
+        });
+    }
+}
+```
 ### 상품 Domain 구현
 #### 구현기능
 * 상품 등록
@@ -836,9 +1107,333 @@ public class Member {
 * 상품 수정
 #### 순서
 * 상품 엔티티 개발
+1. Item Entity
+```java
+package com.innotree.bcs.bp.study.jpa.demo.product.domain;
+
+import com.innotree.bcs.bp.study.jpa.demo.exception.NotEnoughStockException;
+import lombok.Getter;
+import lombok.Setter;
+
+import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
+
+@Entity
+@Getter @Setter
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name = "dtype")
+public abstract class Item {
+
+    @Id
+    @GeneratedValue
+    @Column(name = "item_id")
+    private Long id;
+
+    private String name;
+    private int price;
+    private int stockQuantity;
+
+    @ManyToMany(mappedBy = "items")
+    private List<Category> categories = new ArrayList<>();
+
+    //==비즈니스 로직==//
+    public void addStock(int quantity) {
+        this.stockQuantity += quantity;
+    }
+
+    public void removeStock(int quantity) {
+        int restStock = this.stockQuantity - quantity;
+        if(restStock < 0) {
+            throw new NotEnoughStockException("재고가 부족합니다");
+        }
+        this.stockQuantity = restStock;
+    }
+}
+
+```
+2. NotEnoughStockException
+```java
+package com.innotree.bcs.bp.study.jpa.demo.exception;
+
+public class NotEnoughStockException extends RuntimeException {
+    public NotEnoughStockException() {
+    }
+
+    public NotEnoughStockException(String message) {
+        super(message);
+    }
+
+    public NotEnoughStockException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public NotEnoughStockException(Throwable cause) {
+        super(cause);
+    }
+
+    public NotEnoughStockException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+        super(message, cause, enableSuppression, writableStackTrace);
+    }
+}
+
+```
+3. Book Entity
+````java
+package com.innotree.bcs.bp.study.jpa.demo.product.domain;
+
+import lombok.Getter;
+import lombok.Setter;
+
+import javax.persistence.DiscriminatorValue;
+import javax.persistence.Entity;
+
+@Entity
+@DiscriminatorValue("B")
+@Getter @Setter
+public class Book extends Item{
+    private String author;
+    private String isbn;
+}
+````
+3. Album Entity
+```java
+package com.innotree.bcs.bp.study.jpa.demo.product.domain;
+
+import lombok.Getter;
+import lombok.Setter;
+
+import javax.persistence.DiscriminatorValue;
+import javax.persistence.Entity;
+
+@Entity
+@DiscriminatorValue("A")
+@Getter @Setter
+public class Album extends Item{
+    private String artist;
+    private String etc;
+}
+```
+4. Movie Entity
+```java
+package com.innotree.bcs.bp.study.jpa.demo.product.domain;
+
+import lombok.Getter;
+import lombok.Setter;
+
+import javax.persistence.DiscriminatorValue;
+import javax.persistence.Entity;
+
+@Entity
+@DiscriminatorValue("M")
+@Getter @Setter
+public class Movie extends Item{
+    private String director;
+    private String actor;
+}
+```
+5. Category Entity
+```java
+package com.innotree.bcs.bp.study.jpa.demo.product.domain;
+
+import lombok.Getter;
+import lombok.Setter;
+
+import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
+
+@Entity
+@Getter @Setter
+public class Category {
+    @Id @GeneratedValue
+    @Column(name = "category_id")
+    private Long id;
+    private String name;
+
+    @ManyToMany
+    @JoinTable(name = "category_item",
+        joinColumns = @JoinColumn(name = "category_id"),
+        inverseJoinColumns = @JoinColumn(name="item_id"))
+    private List<Item> items = new ArrayList<>();
+
+    @ManyToOne
+    @JoinColumn(name = "parent_id")
+    private Category parent;
+
+    @OneToMany(mappedBy = "parent")
+    private List<Category> child = new ArrayList<>();
+
+    public void addChildCategory(Category child) {
+        this.child.add(child);
+        child.setParent(this);
+    }
+}
+```
 * 상품 레포지토리 개발
+````java
+package com.innotree.bcs.bp.study.jpa.demo.product.repository;
+
+import com.innotree.bcs.bp.study.jpa.demo.product.domain.Item;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Repository;
+
+import javax.persistence.EntityManager;
+import java.util.List;
+
+@Repository
+@RequiredArgsConstructor
+public class ItemRepository {
+
+    private final EntityManager entityManager;
+
+    public void save(Item item) {
+        if(item.getId() == null) {
+            entityManager.persist(item);
+        } else {
+            entityManager.merge(item);
+        }
+    }
+
+    public Item findOne(Long id) {
+        return entityManager.find(Item.class, id);
+    }
+
+    public List<Item> findAll() {
+        return entityManager.createQuery("select i from Item i", Item.class)
+                .getResultList();
+    }
+}
+
+````
 * 상품 서비스 개발
+```java
+package com.innotree.bcs.bp.study.jpa.demo.product.service;
+
+import com.innotree.bcs.bp.study.jpa.demo.product.domain.Item;
+import com.innotree.bcs.bp.study.jpa.demo.product.repository.ItemRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+@Service
+@Transactional(readOnly = true)
+@RequiredArgsConstructor
+public class ItemService {
+    private final ItemRepository itemRepository;
+
+    @Transactional
+    public Long saveItem(Item item) {
+        itemRepository.save(item);
+        return item.getId();
+    }
+
+    public List<Item> findItems() {
+        return itemRepository.findAll();
+    }
+
+    public Item findOne(Long id) {
+        return itemRepository.findOne(id);
+    }
+}
+
+```
 * 상품 기능 테스트 코드 구현
+```java
+package com.innotree.bcs.bp.study.jpa.demo.product.service;
+
+import com.innotree.bcs.bp.study.jpa.demo.exception.NotEnoughStockException;
+import com.innotree.bcs.bp.study.jpa.demo.product.domain.Book;
+import com.innotree.bcs.bp.study.jpa.demo.product.domain.Item;
+import com.innotree.bcs.bp.study.jpa.demo.product.repository.ItemRepository;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+@SpringBootTest
+@Transactional
+class ItemServiceTest {
+
+    @Autowired ItemService itemService;
+    @Autowired ItemRepository itemRepository;
+
+    @Test
+    @DisplayName(value = "상품등록")
+    public void saveItem() {
+        //Given
+        Item item = new Book();
+        item.setName("itemA");
+        item.setPrice(10000);
+        item.setStockQuantity(100);
+        //When
+        Long saveItem = itemService.saveItem(item);
+        //Then
+        assertThat(item).isEqualTo(itemRepository.findOne(item.getId()));
+        assertThrows(NotEnoughStockException.class,
+                () -> itemRepository.findOne(item.getId()).removeStock(101));
+    }
+    @Test
+    @DisplayName(value = "재고부족예외")
+    public void itemStockException() {
+        //Given
+        Item item = new Book();
+        item.setName("itemA");
+        item.setPrice(10000);
+        item.setStockQuantity(100);
+        //When
+        Long saveItem = itemService.saveItem(item);
+        //Then
+        assertThrows(NotEnoughStockException.class,
+                () -> itemRepository.findOne(item.getId()).removeStock(101));
+    }
+}
+```
+### 배송 Domain 구현
+#### 순서
+* 배송 엔티티 구현
+1. Delivery Entity
+```java
+package com.innotree.bcs.bp.study.jpa.demo.delivery.domain;
+
+import com.innotree.bcs.bp.study.jpa.demo.member.domain.Address;
+import com.innotree.bcs.bp.study.jpa.demo.order.domain.Order;
+import lombok.Getter;
+import lombok.Setter;
+
+import javax.persistence.*;
+
+@Entity
+@Getter @Setter
+public class Delivery {
+    @Id @GeneratedValue
+    @Column(name = "delivery_id")
+    private Long id;
+
+    @OneToOne(mappedBy = "delivery")
+    private Order order;
+
+    @Embedded
+    private Address address;
+
+    @Enumerated(EnumType.STRING)
+    private DeliveryStatus status;
+}
+``` 
+2. DeliveryStatus
+```java
+package com.innotree.bcs.bp.study.jpa.demo.delivery.domain;
+
+public enum DeliveryStatus {
+    READY, COMP
+}
+```
 ### 주문 Domain 구현
 #### 구현기능
 * 상품 주문
@@ -846,23 +1441,1013 @@ public class Member {
 * 주문 취소
 #### 순서
 * 주문 엔티티, 주문상품 엔티티 개발
+1. Order Entity
+```java
+package com.innotree.bcs.bp.study.jpa.demo.order.domain;
+
+import com.innotree.bcs.bp.study.jpa.demo.delivery.domain.Delivery;
+import com.innotree.bcs.bp.study.jpa.demo.delivery.domain.DeliveryStatus;
+import com.innotree.bcs.bp.study.jpa.demo.member.domain.Member;
+import lombok.Getter;
+import lombok.Setter;
+
+import javax.persistence.*;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+@Entity
+@Getter @Setter
+@Table(name = "orders")
+public class Order {
+    @Id @GeneratedValue
+    @Column(name = "order_id")
+    private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "member_id")
+    private Member member;
+
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+    private List<OrderItem> orderItems = new ArrayList<>();
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "delivery_id")
+    private Delivery delivery;
+
+    private LocalDateTime orderDate;
+
+    @Enumerated(EnumType.STRING)
+    private OrderStatus status;
+
+    public void setMember(Member member) {
+        this.member = member;
+        member.getOrders().add(this);
+    }
+
+    public void setDelivery(Delivery delivery) {
+        this.delivery = delivery;
+        delivery.setOrder(this);
+    }
+
+    public void addOrderItem(OrderItem orderItem) {
+        orderItems.add(orderItem);
+        orderItem.setOrder(this);
+    }
+
+    //==생성 메서드==//
+    public static Order createOrder(Member member, Delivery delivery, OrderItem... orderItems) {
+        Order order = new Order();
+        order.setMember(member);
+        order.setDelivery(delivery);
+        for(OrderItem orderItem : orderItems){
+            order.addOrderItem(orderItem);
+        }
+        order.setStatus(OrderStatus.ORDER);
+        order.setOrderDate(LocalDateTime.now());
+        return order;
+    }
+    //==비즈니스 로직==//
+    /** 주문취소 */
+    public void cancel() {
+        if(delivery.getStatus() == DeliveryStatus.COMP){
+            throw new IllegalStateException("이미 배송완료된 상품은 취소가 불가능합니다");
+        }
+
+        this.setStatus(OrderStatus.CANCEL);
+        for(OrderItem orderItem : orderItems) {
+            orderItem.cancel();
+        }
+    }
+
+    //==조회 로직==//
+    /** 전체 주문가격조회 */
+    public int getTotalPrice() {
+        int totalPrice = 0;
+        for(OrderItem orderItem : orderItems){
+            totalPrice += orderItem.getTotalPrice();
+        }
+        return totalPrice;
+    }
+
+}
+
+```
+2. OrderItem Entity
+```java
+package com.innotree.bcs.bp.study.jpa.demo.order.domain;
+
+import com.innotree.bcs.bp.study.jpa.demo.product.domain.Item;
+import lombok.Getter;
+import lombok.Setter;
+
+import javax.persistence.*;
+
+@Entity
+@Getter @Setter
+@Table(name = "order_item")
+public class OrderItem {
+    @Id @GeneratedValue
+    @Column(name = "order_item_id")
+    private Long id;
+
+    private int orderPrice;
+    private int count;
+
+    @ManyToOne
+    @JoinColumn(name = "order_id")
+    private Order order;
+    @ManyToOne
+    @JoinColumn(name = "item_id")
+    private Item item;
+
+    //==생성자 메서드==//
+    public static OrderItem createOrderItem(Item item, int orderPrice, int count) {
+        OrderItem orderItem = new OrderItem();
+        orderItem.setItem(item);
+        orderItem.setOrderPrice(orderPrice);
+        orderItem.setCount(count);
+        item.removeStock(count);
+        return orderItem;
+    }
+
+    //==비즈니스 메서드==//
+    /** 주문취소 */
+    public void cancel() {
+        getItem().addStock(count);
+    }
+    /** 주문상품 가격조회 */
+    public int getTotalPrice() {
+        return getOrderPrice() * getCount();
+    }
+}
+```
+3. OrderStatus
+```java
+package com.innotree.bcs.bp.study.jpa.demo.order.domain;
+
+public enum OrderStatus {
+    ORDER, CANCEL
+}
+
+```
+4. OrderSearch 
+```java
+package com.innotree.bcs.bp.study.jpa.demo.order.domain;
+
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter @Setter
+public class OrderSearch {
+    private String memberName;
+    private OrderStatus orderStatus;
+}
+```
+
 * 주문 레포지토리 개발
+```java
+package com.innotree.bcs.bp.study.jpa.demo.order.repository;
+
+import com.innotree.bcs.bp.study.jpa.demo.member.domain.Member;
+import com.innotree.bcs.bp.study.jpa.demo.order.domain.Order;
+import com.innotree.bcs.bp.study.jpa.demo.order.domain.OrderSearch;
+import lombok.RequiredArgsConstructor;
+
+import org.springframework.stereotype.Repository;
+import org.springframework.util.StringUtils;
+
+import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.*;
+import java.util.ArrayList;
+import java.util.List;
+
+@Repository
+@RequiredArgsConstructor
+public class OrderRepository {
+    private final EntityManager entityManager;
+
+    public void save(Order order) {
+        entityManager.persist(order);
+    }
+
+    public Order findOne(Long id) {
+        return entityManager.find(Order.class, id);
+    }
+
+    public List<Order> findByString(OrderSearch orderSearch) {
+        //Language JPQL
+        String jpql = "select o form Order o join o.member m";
+        boolean isFirstCondition = true;
+
+        //주문 상태 검색
+        if(orderSearch.getOrderStatus() != null) {
+            if(isFirstCondition) {
+                jpql += " where";
+                isFirstCondition =false;
+            }else{
+                jpql += " and";
+            }
+            jpql += " o.status = :status";
+        }
+
+        //회원이름 검색
+        if(StringUtils.hasText(orderSearch.getMemberName())) {
+            if(isFirstCondition) {
+                jpql += " where";
+                isFirstCondition = false;
+
+            }else{
+                jpql += " and";
+            }
+            jpql += " m.name like :name";
+        }
+        TypedQuery<Order> query = entityManager.createQuery(jpql, Order.class)
+                .setMaxResults(1000);
+        if(orderSearch.getOrderStatus() != null) {
+            query.setParameter("status", orderSearch.getOrderStatus());
+        }
+        if (StringUtils.hasText(orderSearch.getMemberName())) {
+            query.setParameter("name", orderSearch.getMemberName());
+        }
+        return query.getResultList();
+    }
+
+    public List<Order> findAllByCriteria(OrderSearch orderSearch) {
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Order> criteriaQuery = criteriaBuilder.createQuery(Order.class);
+        Root<Order> o = criteriaQuery.from(Order.class);
+        Join<Order, Member> m = o.join("member", JoinType.INNER);
+
+        List<Predicate> criteria = new ArrayList<>();
+        //주문상태 검색
+        if(orderSearch.getOrderStatus() != null) {
+            Predicate status = criteriaBuilder.equal(o.get("status"), orderSearch.getOrderStatus());
+            criteria.add(status);
+        }
+        //회원 이름 검색
+        if (StringUtils.hasText(orderSearch.getMemberName())) {
+            Predicate name = criteriaBuilder.like(m.<String>get("name"), "%" + orderSearch.getMemberName() + "%");
+            criteria.add(name);
+        }
+        criteriaQuery.where(criteriaBuilder.and(criteria.toArray(new Predicate[criteria.size()])));
+        TypedQuery<Order> query = entityManager.createQuery(criteriaQuery).setMaxResults(1000);
+        return query.getResultList();
+    }
+}
+
+```
 * 주문 서비스 개발
+```java
+package com.innotree.bcs.bp.study.jpa.demo.order.service;
+
+import com.innotree.bcs.bp.study.jpa.demo.delivery.domain.Delivery;
+import com.innotree.bcs.bp.study.jpa.demo.delivery.domain.DeliveryStatus;
+import com.innotree.bcs.bp.study.jpa.demo.delivery.repository.DeliveryRepository;
+import com.innotree.bcs.bp.study.jpa.demo.member.domain.Member;
+import com.innotree.bcs.bp.study.jpa.demo.member.repository.MemberRepository;
+import com.innotree.bcs.bp.study.jpa.demo.order.domain.Order;
+import com.innotree.bcs.bp.study.jpa.demo.order.domain.OrderItem;
+import com.innotree.bcs.bp.study.jpa.demo.order.domain.OrderSearch;
+import com.innotree.bcs.bp.study.jpa.demo.order.repository.OrderRepository;
+import com.innotree.bcs.bp.study.jpa.demo.product.domain.Item;
+import com.innotree.bcs.bp.study.jpa.demo.product.repository.ItemRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+@Service
+@Transactional(readOnly = true)
+@RequiredArgsConstructor
+public class OrderService {
+    private final MemberRepository memberRepository;
+    private final OrderRepository orderRepository;
+    private final ItemRepository itemRepository;
+    private final DeliveryRepository deliveryRepository;
+
+    /** 주문 생성 */
+    @Transactional
+    public Long order(Long memberId, Long itemId, int count) {
+
+        //Entity 조회
+        Member member = memberRepository.findOne(memberId);
+        Item item = itemRepository.findOne(itemId);
+
+        //배송정보 생성
+        Delivery delivery = new Delivery();
+        delivery.setAddress(member.getAddress());
+        delivery.setStatus(DeliveryStatus.READY);
+
+        //주문상품생성
+        OrderItem orderItem = OrderItem.createOrderItem(item, item.getPrice(), count);
+
+        //주문생성
+        Order order = Order.createOrder(member, delivery, orderItem);
+
+        //주문저장
+        orderRepository.save(order);
+        return order.getId();
+    }
+
+    /** 주문 취소 */
+    @Transactional
+    public void cancelOrder(Long orderId) {
+        Order order = orderRepository.findOne(orderId);
+        order.cancel();
+    }
+    /** 주문검색 */
+
+    public List<Order> findOrders(OrderSearch orderSearch) {
+        return orderRepository.findAllByCriteria(orderSearch);
+    }
+
+}
+
+```
 * 주문 기능 테스트 코드 구현
+```java
+package com.innotree.bcs.bp.study.jpa.demo.order.service;
+
+import com.innotree.bcs.bp.study.jpa.demo.exception.NotEnoughStockException;
+import com.innotree.bcs.bp.study.jpa.demo.member.domain.Address;
+import com.innotree.bcs.bp.study.jpa.demo.member.domain.Member;
+import com.innotree.bcs.bp.study.jpa.demo.order.domain.Order;
+import com.innotree.bcs.bp.study.jpa.demo.order.domain.OrderSearch;
+import com.innotree.bcs.bp.study.jpa.demo.order.domain.OrderStatus;
+import com.innotree.bcs.bp.study.jpa.demo.order.repository.OrderRepository;
+import com.innotree.bcs.bp.study.jpa.demo.product.domain.Book;
+import com.innotree.bcs.bp.study.jpa.demo.product.domain.Item;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.Rollback;
+import org.springframework.transaction.annotation.Transactional;
+
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+@SpringBootTest
+@Transactional
+@Rollback(value = false)
+class OrderServiceTest {
+
+    @PersistenceContext EntityManager entityManager;
+
+    @Autowired OrderService orderService;
+    @Autowired OrderRepository orderRepository;
+
+    @Test
+    @DisplayName(value = "상품주문")
+    public void creatOrder() {
+        Member member = createMember();
+        Item item =createBook("JPA Book", 10000, 10);
+        int orderCount = 2;
+
+        Long orderId = orderService.order(member.getId(), item.getId(), orderCount);
+        Order order = orderRepository.findOne(orderId);
+
+        /* 상품 주문시 상태는 ORDER 이다 */
+        assertThat(OrderStatus.ORDER).isEqualTo(order.getStatus());
+        /* 주문한 상품 수가 맞아야 한다 */
+        assertThat(1).isEqualTo(order.getOrderItems().size());
+        /* 주문 가격은 상품 * 수량이다 */
+        assertThat(10000 * 2).isEqualTo(order.getTotalPrice());
+        /* 주문 수량만틈 재고가 줄어야 한다 */
+        assertThat(8).isEqualTo(item.getStockQuantity());
+    }
+
+    @Test
+    @DisplayName(value = "상품주문_재고수량초과")
+    public void orderItemStockOver() {
+
+        Member member = createMember();
+        Item item = createBook("JAP BOOK", 10000, 8);
+        int orderCount = 11;
+
+        assertThrows(NotEnoughStockException.class,
+                () -> orderService.order(member.getId(), item.getId(), orderCount));
+    }
+
+    @Test
+    @DisplayName(value = "주문취소")
+    public void orderCancel() {
+        Member member = createMember();
+        Item item = createBook("JPA Book", 8000, 10);
+        int orderCount = 2;
+
+        Long orderId = orderService.order(member.getId(), item.getId(), orderCount);
+        orderService.cancelOrder(orderId);
+
+        Order order = orderRepository.findOne(orderId);
+        /* 주문 취소시 주문상태는 CANCEL 이다 */
+        assertThat(OrderStatus.CANCEL).isEqualTo(order.getStatus());
+        /* 주문이 취소된 상품은 그만큼 재고가 증가해야 한다 */
+        assertThat(10).isEqualTo(item.getStockQuantity());
+    }
+
+    @Test
+    @DisplayName(value = "주문검색")
+    public void orderSearch() {
+        Member member = createMember();
+        Item item = createBook("JPA Book", 10000, 10);
+        OrderSearch orderSearch = new OrderSearch();
+        orderSearch.setOrderStatus(OrderStatus.ORDER);
+        orderSearch.setMemberName("이경익");
+        int orderCount = 5;
+
+        Long orderId = orderService.order(member.getId(), item.getId(), orderCount);
+        List<Order> orders = orderService.findOrders(orderSearch);
+
+        assertThat(1).isEqualTo(orders.size());
+    }
+
+
+    private Book createBook(String name, int price, int stockQuantity) {
+        Book book = new Book();
+        book.setName(name);
+        book.setPrice(price);
+        book.setStockQuantity(stockQuantity);
+        book.setAuthor("이경익");
+        book.setIsbn("123-45678-90");
+        entityManager.persist(book);
+        return book;
+    }
+
+    private Member createMember() {
+        Member member = new Member();
+        member.setName("이경익");
+        member.setAddress(new Address("인천 계양구", "주부토로", "12345"));
+        entityManager.persist(member);
+        return member;
+    }
+}
+```
 ## 웹 계층 개발 -작성중
 * 홈화면
 * 회원기능
-  * 회원 등록
-  * 회원 조회
-* 상품 기능
-  * 상품 등록
-  * 상품 수정
-  * 상품 조회
-* 주문기능
-  * 상품 주문
-  * 주문 내역 조회
-  * 주문 취소
+1. MemberController
+```java
+package com.innotree.bcs.bp.study.jpa.demo.web.controller;
 
+import com.innotree.bcs.bp.study.jpa.demo.member.domain.Address;
+import com.innotree.bcs.bp.study.jpa.demo.member.domain.Member;
+import com.innotree.bcs.bp.study.jpa.demo.member.service.MemberService;
+import com.innotree.bcs.bp.study.jpa.demo.web.form.MemberForm;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+
+import javax.validation.Valid;
+import java.util.List;
+
+@Controller
+@RequiredArgsConstructor
+public class MemberController {
+
+    private final MemberService memberService;
+
+    @GetMapping(value = "/members/new")
+    public String createForm(Model model) {
+        model.addAttribute("memberForm", new MemberForm());
+        return "members/createMemberForm";
+    }
+
+    @PostMapping(value = "/members/new")
+    public String create(@Valid MemberForm form, BindingResult result) {
+        if (result.hasErrors()) {
+            return "members/createMemberForm";
+        }
+        Address address = new Address(form.getCity(), form.getStreet(), form.getZipcode());
+
+        Member member = new Member();
+        member.setName(form.getName());
+        member.setAddress(address);
+        memberService.join(member);
+        return "redirect:/";
+    }
+
+    @GetMapping(value = "/members")
+    public String listMember(Model model) {
+        List<Member> members = memberService.findMembers();
+        model.addAttribute("members",members);
+        return "members/memberList";
+    }
+}
+
+```
+2. MemberForm
+```java
+package com.innotree.bcs.bp.study.jpa.demo.web.form;
+
+import lombok.Getter;
+import lombok.Setter;
+
+import javax.validation.constraints.NotEmpty;
+
+@Getter @Setter
+public class MemberForm {
+    @NotEmpty(message = "회원 이름은 필수 입니다")
+    private String name;
+    private String city;
+    private String street;
+    private String zipcode;
+}
+
+```
+3. createMemberForm.html
+```html
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/header :: header" />
+<style>
+    .fieldError {
+        border-color: #bd2130;
+    }
+</style>
+<body>
+<div class="container">
+    <div th:replace="fragments/bodyHeader :: bodyHeader"/>
+    <form role="form" action="/members/new" th:object="${memberForm}"
+          method="post">
+        <div class="form-group">
+            <label th:for="name">이름</label>
+            <input type="text" th:field="*{name}" class="form-control"
+                   placeholder="이름을 입력하세요"
+                   th:class="${#fields.hasErrors('name')}? 'form-control
+fieldError' : 'form-control'">
+            <p th:if="${#fields.hasErrors('name')}"
+               th:errors="*{name}">Incorrect date</p>
+        </div>
+        <div class="form-group">
+            <label th:for="city">도시</label>
+            <input type="text" th:field="*{city}" class="form-control"
+                   placeholder="도시를 입력하세요">
+        </div>
+        <div class="form-group">
+            <label th:for="street">거리</label>
+            <input type="text" th:field="*{street}" class="form-control"
+                   placeholder="거리를 입력하세요">
+        </div>
+        <div class="form-group">
+            <label th:for="zipcode">우편번호</label>
+            <input type="text" th:field="*{zipcode}" class="form-control"
+                   placeholder="우편번호를 입력하세요">
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+    <br/>
+    <div th:replace="fragments/footer :: footer" />
+</div> <!-- /container -->
+</body>
+</html>
+```
+4. memberList.html
+```html
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/header :: header" />
+<body>
+<div class="container">
+    <div th:replace="fragments/bodyHeader :: bodyHeader" />
+    <div>
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>#</th>
+                <th>이름</th>
+                <th>도시</th>
+                <th>주소</th>
+                <th>우편번호</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="member : ${members}">
+                <td th:text="${member.id}"></td>
+                <td th:text="${member.name}"></td>
+                <td th:text="${member.address?.city}"></td>
+                <td th:text="${member.address?.street}"></td>
+                <td th:text="${member.address?.zipcode}"></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <div th:replace="fragments/footer :: footer" />
+</div> <!-- /container -->
+</body>
+</html>
+>
+```
+  * 상품 기능
+1. ItemController
+```java
+package com.innotree.bcs.bp.study.jpa.demo.web.controller;
+
+import com.innotree.bcs.bp.study.jpa.demo.product.domain.Book;
+import com.innotree.bcs.bp.study.jpa.demo.product.domain.Item;
+import com.innotree.bcs.bp.study.jpa.demo.product.service.ItemService;
+import com.innotree.bcs.bp.study.jpa.demo.web.form.BookForm;
+import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.convention.MatchingStrategies;
+import org.modelmapper.spi.MatchingStrategy;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+
+import javax.validation.Valid;
+import java.util.List;
+
+@Controller
+@RequiredArgsConstructor
+public class ItemController {
+
+    private final ItemService itemService;
+
+    @GetMapping(value = "/items/new")
+    public String createItemForm(Model model) {
+        model.addAttribute("form", new BookForm());
+        return "items/createItemForm";
+    }
+
+    @PostMapping(value = "/items/new")
+    public String createItem(@Valid BookForm form, BindingResult result) {
+        Book book = new Book();
+        book.setName(form.getName());
+        book.setPrice(form.getPrice());
+        book.setStockQuantity(form.getStockQuantity());
+        book.setAuthor(form.getAuthor());
+        book.setIsbn(form.getIsbn());
+        itemService.saveItem(book);
+
+        return "redirect:/items";
+    }
+
+    @GetMapping(value = "/items")
+    public String listItem(Model model) {
+        List<Item> items = itemService.findItems();
+        model.addAttribute("items", items);
+        return "/items/itemList";
+    }
+
+    @GetMapping(value = "/items/{itemId}/edit")
+    public String updateItemForm(@PathVariable("itemId") Long itemId, Model model) {
+        Book item = (Book)itemService.findOne(itemId);
+
+        ModelMapper mapper = new ModelMapper();
+        mapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
+        mapper.map(item, BookForm.class);
+
+        model.addAttribute("form", item);
+
+        return "items/updateItemForm";
+    }
+
+    @PostMapping(value = "/items/{itemId}/edit")
+    public String updateItem(@ModelAttribute("form")  @Valid BookForm form, BindingResult result, Model model) {
+
+        ModelMapper mapper = new ModelMapper();
+        mapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
+        Book book = mapper.map(form, Book.class);
+        itemService.saveItem(book);
+
+        return "redirect:/items";
+    }
+}
+
+```
+2. BookForm
+```java
+package com.innotree.bcs.bp.study.jpa.demo.web.form;
+
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter @Setter
+public class BookForm {
+    private Long id;
+    private String name;
+    private int price;
+    private int stockQuantity;
+    private String author;
+    private String isbn;
+}
+
+```
+3. createItemForm.html
+```html
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/header :: header" />
+<body>
+<div class="container">
+    <div th:replace="fragments/bodyHeader :: bodyHeader"/>
+    <form th:action="@{/items/new}" th:object="${form}" method="post">
+        <div class="form-group">
+            <label th:for="name">상품명</label>
+            <input type="text" th:field="*{name}" class="form-control"
+                   placeholder="이름을 입력하세요">
+        </div>
+        <div class="form-group">
+            <label th:for="price">가격</label>
+            <input type="number" th:field="*{price}" class="form-control"
+                   placeholder="가격을 입력하세요">
+        </div>
+        <div class="form-group">
+            <label th:for="stockQuantity">수량</label>
+            <input type="number" th:field="*{stockQuantity}" class="form-control"
+                   placeholder="수량을 입력하세요">
+        </div>
+        <div class="form-group">
+            <label th:for="author">저자</label>
+            <input type="text" th:field="*{author}" class="form-control"
+                   placeholder="저자를 입력하세요">
+        </div>
+        <div class="form-group">
+            <label th:for="isbn">ISBN</label>
+            <input type="text" th:field="*{isbn}" class="form-control"
+                   placeholder="ISBN을 입력하세요">
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+    <br/>
+    <div th:replace="fragments/footer :: footer" />
+</div> <!-- /container -->
+</body>
+</html>
+```
+4. itemList.html
+```html
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/header :: header" />
+<body>
+<div class="container">
+    <div th:replace="fragments/bodyHeader :: bodyHeader"/>
+    <div>
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>#</th>
+                <th>상품명</th>
+                <th>가격</th>
+                <th>재고수량</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="item : ${items}">
+                <td th:text="${item.id}"></td>
+                <td th:text="${item.name}"></td>
+                <td th:text="${item.price}"></td>
+                <td th:text="${item.stockQuantity}"></td>
+                <td>
+                    <a href="#" th:href="@{/items/{id}/edit (id=${item.id})}"
+                       class="btn btn-primary" role="button">수정</a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <div th:replace="fragments/footer :: footer"/>
+</div> <!-- /container -->
+</body>
+</html>
+```
+5. updateItemForm.html
+````html
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/header :: header" />
+<body>
+<div class="container">
+    <div th:replace="fragments/bodyHeader :: bodyHeader"/>
+    <form th:object="${form}" method="post">
+        <!-- id -->
+        <input type="hidden" th:field="*{id}" />
+        <div class="form-group">
+            <label th:for="name">상품명</label>
+            <input type="text" th:field="*{name}" class="form-control"
+                   placeholder="이름을 입력하세요" />
+        </div>
+        <div class="form-group">
+            <label th:for="price">가격</label>
+            <input type="number" th:field="*{price}" class="form-control"
+                   placeholder="가격을 입력하세요" />
+        </div>
+        <div class="form-group">
+            <label th:for="stockQuantity">수량</label>
+            <input type="number" th:field="*{stockQuantity}" class="form-control"
+                   placeholder="수량을 입력하세요" />
+        </div>
+        <div class="form-group">
+            <label th:for="author">저자</label>
+            <input type="text" th:field="*{author}" class="form-control"
+                   placeholder="저자를 입력하세요" />
+        </div>
+        <div class="form-group">
+            <label th:for="isbn">ISBN</label>
+            <input type="text" th:field="*{isbn}" class="form-control"
+                   placeholder="ISBN을 입력하세요" />
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+    <div th:replace="fragments/footer :: footer" />
+</div> <!-- /container -->
+</body>
+</html>
+````
+  * 주문기능
+1. OrderController
+```java
+package com.innotree.bcs.bp.study.jpa.demo.web.controller;
+
+import com.innotree.bcs.bp.study.jpa.demo.member.domain.Member;
+import com.innotree.bcs.bp.study.jpa.demo.member.service.MemberService;
+import com.innotree.bcs.bp.study.jpa.demo.order.domain.Order;
+import com.innotree.bcs.bp.study.jpa.demo.order.domain.OrderSearch;
+import com.innotree.bcs.bp.study.jpa.demo.order.service.OrderService;
+import com.innotree.bcs.bp.study.jpa.demo.product.domain.Item;
+import com.innotree.bcs.bp.study.jpa.demo.product.service.ItemService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@Controller
+@RequiredArgsConstructor
+public class OrderController {
+    private final OrderService orderService;
+    private final MemberService memberService;
+    private final ItemService itemService;
+
+    @GetMapping(value = "/order")
+    public String createOrderForm(Model model) {
+        List<Member> members = memberService.findMembers();
+        List<Item> items = itemService.findItems();
+
+        model.addAttribute("members", members);
+        model.addAttribute("items", items);
+
+        return "order/createOrderForm";
+    }
+
+    @PostMapping(value = "/order")
+    public String createOrder(
+            @RequestParam("memberId") Long memberId,
+            @RequestParam("itemId") Long itemId,
+            @RequestParam("count") int count) {
+        Long orderId = orderService.order(memberId, itemId, count);
+        return "redirect:/orders";
+    }
+
+    @GetMapping(value = "/orders")
+    public String orderList(@ModelAttribute("orderSearch") OrderSearch orderSearch, Model model) {
+        List<Order> orders = orderService.findOrders(orderSearch);
+        model.addAttribute("orders", orders);
+
+        return "order/orderList";
+    }
+
+    @PostMapping(value = "/orders/{orderId}/cancel")
+    public String orderCancel(@PathVariable("orderId") Long orderId, Model model) {
+        orderService.cancelOrder(orderId);
+        return "redirect:/orders";
+    }
+}
+
+```
+
+2. crateOrderForm.html
+```html
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/header :: header" />
+<body>
+<div class="container">
+    <div th:replace="fragments/bodyHeader :: bodyHeader"/>
+    <form role="form" action="/order" method="post">
+        <div class="form-group">
+            <label for="member">주문회원</label>
+            <select name="memberId" id="member" class="form-control">
+                <option value="">회원선택</option>
+                <option th:each="member : ${members}"
+                        th:value="${member.id}"
+                        th:text="${member.name}" />
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="item">상품명</label>
+            <select name="itemId" id="item" class="form-control">
+                <option value="">상품선택</option>
+                <option th:each="item : ${items}"
+                        th:value="${item.id}"
+                        th:text="${item.name}" />
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="count">주문수량</label>
+            <input type="number" name="count" class="form-control" id="count"
+                   placeholder="주문 수량을 입력하세요">
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+    <br/>
+    <div th:replace="fragments/footer :: footer" />
+</div> <!-- /container -->
+</body>
+</html>
+```
+3. orderList.html
+```html
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/header :: header"/>
+<body>
+<div class="container">
+    <div th:replace="fragments/bodyHeader :: bodyHeader"/>
+    <div>
+        <div>
+            <form th:object="${orderSearch}" class="form-inline">
+                <div class="form-group mb-2">
+                    <input type="text" th:field="*{memberName}" class="formcontrol"
+                           placeholder="회원명"/>
+                </div>
+                <div class="form-group mx-sm-1 mb-2">
+                    <select th:field="*{orderStatus}" class="form-control">
+                        <option value="">주문상태</option>
+                        <option th:each=
+                                        "status : ${T(com.innotree.bcs.bp.study.jpa.demo.order.domain.OrderStatus).values()}"
+                                th:value="${status}"
+                                th:text="${status}">option
+                        </option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary mb-2">검색</button>
+            </form>
+        </div>
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>#</th>
+                <th>회원명</th>
+                <th>대표상품 이름</th>
+                <th>대표상품 주문가격</th>
+                <th>대표상품 주문수량</th>
+                <th>상태</th>
+                <th>일시</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="item : ${orders}">
+                <td th:text="${item.id}"></td>
+                <td th:text="${item.member.name}"></td>
+                <td th:text="${item.orderItems[0].item.name}"></td>
+                <td th:text="${item.orderItems[0].orderPrice}"></td>
+                <td th:text="${item.orderItems[0].count}"></td>
+                <td th:text="${item.status}"></td>
+                <td th:text="${item.orderDate}"></td>
+                <td>
+                    <a th:if="${item.status.name() == 'ORDER'}" href="#"
+                       th:href="'javascript:cancel('+${item.id}+')'"
+                       class="btn btn-danger">CANCEL</a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <div th:replace="fragments/footer :: footer"/>
+</div> <!-- /container -->
+</body>
+<script>
+    function cancel(id) {
+        var form = document.createElement("form");
+        form.setAttribute("method", "post");
+        form.setAttribute("action", "/orders/" + id + "/cancel");
+        document.body.appendChild(form);
+        form.submit();
+    }
+</script>
+</html>
+```
 # 아래내용은 마크다운 사용법 참조용(세미나와 관련없음)
 
 # 제목 1
