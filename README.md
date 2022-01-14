@@ -2024,7 +2024,7 @@ fieldError' : 'form-control'">
     <div>
         <table class="table table-striped">
             <thead>
-            <tr>
+            <tr> 
                 <th>#</th>
                 <th>이름</th>
                 <th>도시</th>
