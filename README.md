@@ -198,6 +198,7 @@ yml 파일에 thymeleaf 관련 설정을 등록한다.
 resources:templates/ +{ViewName}+ .html 와 같이 뷰를 호출할 수 있도록 설정된다. ViewName이 home으로 지정되는 경우 
 다음과 같이 변경되어 호출된다. resources:templates/home.html
 
+아래내용을 application.yml 파일을 등록한다.
 ````yaml
 spring:
   thymeleaf:
@@ -205,11 +206,11 @@ spring:
     suffix: .html
 
 ````
-[그림 3] 프로젝트 구조
+[그림 3] 홈컨트롤러 작성
 ![project_structure](https://user-images.githubusercontent.com/5433728/148375886-e966c17e-874b-4a56-b360-5ab0b802fa57.jpg)
 
-* 타임리프 템플릿 등록 
-1. home.html 
+* 메인 화면 작성 다음의 각 html을 resources/templates 아래에 작성한다.
+1. templates/home.html 
 
 ```html
 <!DOCTYPE HTML>
@@ -242,7 +243,7 @@ spring:
     <div th:replace="fragments/footer :: footer" />
 </div> <!-- /container -->
 ```
-2. templates/header
+2. templates/fragments/header
 ```html
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
@@ -258,7 +259,7 @@ fit=no">
   <title>Hello, world!</title>
 </head>
 ```
-3. templates/bodyheader
+3. templates/fragments/bodyheader
 ````html
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
@@ -270,7 +271,7 @@ fit=no">
 </div>
 ````
 
-4. templates/footer
+4. templates/fragments/footer
 ```html
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
