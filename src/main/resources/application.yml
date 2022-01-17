@@ -6,3 +6,21 @@ spring:
     mode: HTML5
     cache: false
     template-resolver-order: 0
+  datasource:
+    url: jdbc:h2:tcp://localhost/~/demoshop;mode=mysql
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create
+      dialect: org.hibernate.dialect.MySQL57Dialect
+    properties:
+      hibernate:
+        show_sql: true
+        format_sql: true
+logging:
+  level:
+    org.springframework: error
+    org.hibernate.SQL: error
+    org.hibernate.type.descriptor.sql: trace

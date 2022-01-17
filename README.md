@@ -96,6 +96,35 @@ test {
 org.springframework.boot:spring-boot-starter-web을 디펜던시로 추가하게 되면 톰캣을 기본으로 내장하여 기동하게 되어
 웹환경에서 개발을 진행할 수 없다.
 
+#####Github에서 다운 받은 경우 아래와 같이 오류가 발생하는 경우(intelliJ)
+**Cause: invalid source release: 11**
+start.spring.io에서 자바 버젼을 11로 하고
+배포 툴을 gradle로 설정 후 로컬에 셋팅 후 실행시 발생한다.
+
+원인
+gradle의 jvm설정이 11 이하 버젼인데
+bulid.gradle에 sourceCompatibility의 설정이 11로 되어 있어서 발생 한다.
+
+해결
+1. sourceCompatibility 값을 gradle의 설정 jvm값으로 변경한다.
+2. gradle jvm설정을 11로 올린다.
+
+setting -> build, excution, deployment -> bulid tools -> maven -> gradle -> gradle projects -> gradle jvm
+
+**java: warning: source release 11 requires target release 11**
+
+    build.gradle
+    sourceCompatibility = '11'
+
+Project Structure > Project Settings > Project
+   
+    Project SDK = 11
+    Project language level = 11
+
+Project Structure > Platform Settings > SDKs
+    
+    SDKs = 11
+
 ### Spring Boot의 장점
 1) 라이브러리 관리 자동화
 - 기존 스프링 자바 프로젝트에서는 메이븐이나 그래들을 이용해서 라이브러리 의존성을 관리해왔다. 
@@ -423,14 +452,15 @@ spring:
         format_sql: true
 logging:
   level:
-    org.hibernate.SQL: debug
+    org.springframework: error
+    org.hibernate.SQL: error
+    org.hibernate.type.descriptor.sql: trace
 ```
 * spring.jpa.hibernate.ddl-auto: create  이 옵션은 애플리케이션 실행 시점에 테이블을 drop 하고, 다시 생성한다.
 
 * org.hibernate.SQL: true 옵션은 logger를 통해 하이버네이트 실행 SQL을 남긴다.
 
 잘 작동되는지를 확인하기 위해 회원엔티티, 회원레포지토리를 작성하고 테스트를 수행한다.
-
 
 1. 회원엔티티
 ```java
@@ -477,7 +507,32 @@ public class MemberRepository {
     }
 }
 ```
-3. 테스트(src에 main과 test 폴더가 존재하는데 테스트파일은 test폴더 아래에 만든다)
+4. logback-test.xml
+````xml
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/base.xml" />
+    <appender
+            name="STDOUT"
+            class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+    <logger name="org.springframework" level="error" additivity="false"/>
+    <logger name="org.hibernate.SQL" level="error" additivity="false">
+        <appender-ref ref="STDOUT"/>
+    </logger>
+    <logger name="org.hibernate.type.descriptor.sql" level="trace" additivity="false">
+        <appender-ref ref="STDOUT"/>
+    </logger>
+    <logger name="org.hibernate" level="error">
+        <appender-ref ref="STDOUT"/>
+    </logger>
+</configuration>
+
+````
+5. 테스트(src에 main과 test 폴더가 존재하는데 테스트파일은 test폴더 아래에 만든다)
 ````java
 package com.innotree.bcs.bp.study.jpa.demo.member.repository;
 
@@ -530,7 +585,7 @@ class MemberRepositoryTest {
 ![jpa_context](https://user-images.githubusercontent.com/5433728/148476143-ff782ab1-26d9-4d4c-bcaf-fda0b80e92b8.jpg)
  
 * 엔티티를 저장하게 되면 영속컨텍스의 entityManager의 캐시에 저장된다
-````java
+````
 //엔티티를 생성한 상태(비영속)
 Member member = new Member();
 member.setId("member1");
@@ -541,7 +596,7 @@ em.persist(member);
 ![entityManager_persist](https://user-images.githubusercontent.com/5433728/148479048-2fe3d072-1ff0-44ff-9518-7d5100d6ae1c.jpg)
 
 * 엔티티를 조회하게되면 entityManger의 캐시에서 찾는다
-```java
+```
 Member member = new Member();
 member.setId("member1");
 member.setUsername("회원1");
@@ -553,12 +608,12 @@ Member findMember = em.find(Member.class, "member1");
 ![entityManger_find](https://user-images.githubusercontent.com/5433728/148479275-c855e858-1d83-49fa-b4e0-219599933b1c.jpg)
 
 * 1차캐시에 엔티티가 없는 경우 EntityManger는 DB에 쿼리하여 1차캐시에 저장하고 객체를 반환한다.
-````java
+````
 Member findMember2 = em.find(Member.class, "member2");
 ````
   ![entityManager_db_find](https://user-images.githubusercontent.com/5433728/148479437-1bd8a2f4-d468-4766-9437-145da064c86d.jpg)
 * 1차캐시를 사용하게 됨으로써 쓰기지연이 가능하다
-````java
+````
 EntityManager em = emf.createEntityManager();
 EntityTransaction transaction = em.getTransaction();
 //엔티티 매니저는 데이터 변경시 트랜잭션을 시작해야 한다.
@@ -575,7 +630,7 @@ transaction.commit(); // [트랜잭션] 커밋
 
 * 엔티티가 수정된 경우 entityManger의 변경감지 기능이 동작된다. 변경감지(Dirty Checking)는 변경된 내용을
 쓰기지연 SQL 저장소에 저장하였다가 flush() 요청이 있는 경우 데이터베이스에 해당 내용을 기록하고 커밋한다.
-```java
+```
 EntityManager em = emf.createEntityManager();
 EntityTransaction transaction = em.getTransaction();
 transaction.begin(); // [트랜잭션] 시작
@@ -600,7 +655,7 @@ transaction.commit(); // [트랜잭션] 커밋
   * JPQL 쿼리 실행 - 플러시 자동 호출
     * JPQL 쿼리 실행시 플러시가 자동으로 호출되는 이유는 JPQL은 DB에 직접 조회하기 때문에 영속성컨텍스트에서
 아직 커밋되지 않는 엔티티들은 조회되지 않기 때문이다.
-```java
+```
 em.persist(memberA);
 em.persist(memberB);
 em.persist(memberC);
@@ -679,6 +734,14 @@ public class Member {
     private Long id;
 }
 ````
+````yaml
+spring:
+  datasource:
+    url: jdbc:h2:tcp://localhost/~/demoshop;mode=mysql
+
+  jpa:
+      dialect: org.hibernate.dialect.MySQL57Dialect
+````
 ##### SEQUENCE 전략 - 특징
 * 데이터베이스 시퀀스는 유일한 값을 순서대로 생성하는 특별한
   데이터베이스 오브젝트(예: 오라클 시퀀스)
@@ -745,7 +808,6 @@ import lombok.Setter;
 import javax.persistence.*;
 import java.util.Date;
 
-
 @Entity
 @TableGenerator(
         name = "MEMBER_SEQ_GENERATOR",
@@ -785,7 +847,6 @@ public class Member {
 | `precision, scale(DDL)`         | BigDecimal 타입에서 사용한다(BigInteger도 사용할 수 있다). precision은 소수점을 포함한 전체 자릿수를, scale은 소수의 자릿수다. 참고로 double, float 타입에는 적용되지 않는다. 아주 큰 숫자나 정밀한 소수를 다루어야 할 때만 사용한다.  | precision=19, <br/>scale=2 |
 
 ### 다양한 연관관계 매핑
-* 연관관계 매핑 시 고려사항 3가지
 * 다대일[N:1]
 * 일대다[1:N]
 * 일대일[1:1]
@@ -838,7 +899,652 @@ public class Order {
     private Member member; //회원객체참조
 }
 ```
-다음 내용 부터는 고객의 요구사항을 분석하여 도메인을 설계하고 도메인을 바탕으로 JPA이용하여 기능을 구헌하면서 JPA 구조와
+![db_table1](https://user-images.githubusercontent.com/5433728/149699666-725d33d0-c7c4-4a38-9077-dadcb55c8b0e.jpg)
+
+![domain_entity_operator1](https://user-images.githubusercontent.com/5433728/149693679-2bddc037-f13d-45e5-b484-6bba0a755595.jpg)
+----
+
+#### ENTITY 의 동작확인 
+````java
+package com.innotree.bcs.bp.study.jpa.demo.member.domain;
+
+import com.innotree.bcs.bp.study.jpa.demo.order.domain.Order;
+import lombok.Getter;
+import lombok.Setter;
+
+import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
+
+@Entity
+@SequenceGenerator(name = "MEMBER_SEQ_GENERATOR", sequenceName = "MEMBER_SEQ", initialValue = 1, allocationSize = 1)
+@Getter @Setter
+public class Member {
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "MEMBER_SEQ_GENERATOR")
+    @Column(name = "member_id")
+    private Long id;
+    @Column(unique = true, nullable = false, length = 20)
+    private String name;
+
+    @Embedded
+    private Address address;
+}
+
+````
+##### Address
+````java
+package com.innotree.bcs.bp.study.jpa.demo.member.domain;
+
+import javax.persistence.Embeddable;
+
+@Embeddable
+public class Address {
+    protected Address() {
+    }
+
+    public Address(String city, String street, String zipcode) {
+        this.city = city;
+        this.street = street;
+        this.zipcode = zipcode;
+    }
+    private String city;
+    private String street;
+    private String zipcode;
+}
+
+````
+
+###### Entity 테스트(MemeberTest)
+````java
+package com.innotree.bcs.bp.study.jpa.demo.member.domain;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.Rollback;
+import org.springframework.transaction.annotation.Transactional;
+
+import javax.persistence.EntityManager;
+
+
+@SpringBootTest
+@Transactional
+@Rollback(value = false)
+class MemberTest {
+    @Autowired
+    EntityManager em;
+
+    @Test
+    @DisplayName(value = "회원 생성, 조회, 수정, 삭제")
+    public void memberEntity() {
+        Member member = new Member();
+        member.setName("lee");
+        Address address = new Address("Seoul", "Teheran", "12345");
+        member.setAddress(address);
+        em.persist(member);
+        member.setName("kim");
+        em.flush();
+        em.clear();
+
+        Member findMember = em.find(Member.class, member.getId());
+        System.out.println("findMember = " + findMember);
+
+        em.flush();
+        em.remove(findMember);
+    }
+}
+````
+
+###### 일대다 연관관계
+![db_table2](https://user-images.githubusercontent.com/5433728/149707375-8540e256-e99a-4666-90ab-e5ced65e1734.jpg)
+
+![domain_entity_operator2](https://user-images.githubusercontent.com/5433728/149694850-f9987bea-4a4b-45f8-b07e-3a606cc3189d.jpg)
+````java
+package com.innotree.bcs.bp.study.jpa.demo.order.domain;
+
+import com.innotree.bcs.bp.study.jpa.demo.delivery.domain.Delivery;
+import com.innotree.bcs.bp.study.jpa.demo.member.domain.Member;
+import lombok.Getter;
+import lombok.Setter;
+
+import javax.persistence.*;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+@Entity
+@Getter @Setter
+@Table(name = "orders")
+public class Order {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "order_id")
+    private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "member_id")
+    private Member member;
+
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "delivery_id")
+    private Delivery delivery;
+
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<OrderItem> orderItems = new ArrayList<>();
+
+    private int orderPrice;
+    private int orderAmount;
+    private LocalDateTime orderDate;
+
+    @Enumerated(EnumType.STRING)
+    private OrderStatus orderStatus;
+
+    public void setMember(Member member) {
+        if (this.member != null) {
+            this.member.getOrders().remove(this);
+        }
+        this.member = member;
+        member.getOrders().add(this);
+    }
+
+    public void setDelivery(Delivery delivery) {
+        this.delivery = delivery;
+        delivery.setOrder(this);
+    }
+
+    public void addOrderItem(OrderItem orderItem) {
+        this.orderItems.add(orderItem);
+        orderItem.setOrder(this);
+    }
+    
+}
+````
+#####일대다 연관관계 테스트
+````java
+package com.innotree.bcs.bp.study.jpa.demo.order.domain;
+
+import com.innotree.bcs.bp.study.jpa.demo.delivery.domain.Delivery;
+import com.innotree.bcs.bp.study.jpa.demo.delivery.domain.DeliveryStatus;
+import com.innotree.bcs.bp.study.jpa.demo.item.domain.Book;
+import com.innotree.bcs.bp.study.jpa.demo.item.domain.Item;
+import com.innotree.bcs.bp.study.jpa.demo.member.domain.Address;
+import com.innotree.bcs.bp.study.jpa.demo.member.domain.Member;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.Rollback;
+import org.springframework.transaction.annotation.Transactional;
+
+import javax.persistence.EntityManager;
+import java.time.LocalDateTime;
+import java.util.List;
+
+@SpringBootTest
+@Transactional
+@Rollback(value = false)
+class OrderTest {
+
+    @Autowired
+    EntityManager em;
+
+    @Test
+    @DisplayName(value = "연관관계 매핑 - 다대일 / 일대다")
+    public void memberOrder() {
+
+        Member member = createMember("lee");
+
+        Order order = createOrder(member);
+
+        em.flush();
+        em.clear();
+
+        Order findOrder = em.find(Order.class, order.getId());
+        System.out.println("findOrder.getMember().getName() = " + findOrder.getMember().getName());
+
+        int orderAmount = findOrder.getMember().getOrders().get(0).getOrderAmount();
+        System.out.println("orderAmount = " + orderAmount);
+        int size = findOrder.getMember().getOrders().size();
+        System.out.println("size = " + size);
+    }
+
+    private Order createOrder(Member member) {
+        Order order = new Order();
+        order.setMember(member);
+        order.setOrderDate(LocalDateTime.now());
+        order.setOrderAmount(2);
+        order.setOrderStatus(OrderStatus.ORDER);
+        em.persist(order);
+        return order;
+    }
+}
+````
+##### 일대일 연관관계
+![db_table3](https://user-images.githubusercontent.com/5433728/149707564-b4c35c97-4729-411f-ac66-c569c8a00180.jpg)
+
+![domain_entity_operator3](https://user-images.githubusercontent.com/5433728/149700633-2cd0b275-9e7c-4133-ada7-bea83d71ee8c.jpg)
+
+````java
+package com.innotree.bcs.bp.study.jpa.demo.order.domain;
+
+import com.innotree.bcs.bp.study.jpa.demo.delivery.domain.Delivery;
+import com.innotree.bcs.bp.study.jpa.demo.member.domain.Member;
+import lombok.Getter;
+import lombok.Setter;
+
+import javax.persistence.*;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+@Entity
+@Getter @Setter
+@Table(name = "orders")
+public class Order {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "order_id")
+    private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "member_id")
+    private Member member;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "delivery_id")
+    private Delivery delivery;
+    
+    private int orderPrice;
+    private int orderAmount;
+    private LocalDateTime orderDate;
+
+    @Enumerated(EnumType.STRING)
+    private OrderStatus orderStatus;
+
+    public void setMember(Member member) {
+        if(this.member != null) {
+            this.member.getOrders().remove(this);
+        }
+        this.member = member;
+        member.getOrders().add(this);
+    }
+
+    public void setDelivery(Delivery delivery) {
+        this.delivery = delivery;
+        delivery.setOrder(this);
+    }
+}
+
+````
+###### 일대일 연관관계 테스트
+````java
+package com.innotree.bcs.bp.study.jpa.demo.order.domain;
+
+import com.innotree.bcs.bp.study.jpa.demo.delivery.domain.Delivery;
+import com.innotree.bcs.bp.study.jpa.demo.delivery.domain.DeliveryStatus;
+import com.innotree.bcs.bp.study.jpa.demo.item.domain.Book;
+import com.innotree.bcs.bp.study.jpa.demo.item.domain.Item;
+import com.innotree.bcs.bp.study.jpa.demo.member.domain.Address;
+import com.innotree.bcs.bp.study.jpa.demo.member.domain.Member;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.Rollback;
+import org.springframework.transaction.annotation.Transactional;
+
+import javax.persistence.EntityManager;
+import java.time.LocalDateTime;
+import java.util.List;
+
+@SpringBootTest
+@Transactional
+@Rollback(value = false)
+class OrderTest {
+
+    @Autowired
+    EntityManager em;
+    
+    @Test
+    @DisplayName(value = "연관관계 매핑 - 일대일")
+    public void orderDelivery() {
+        Member member = createMember("lee");
+        Order order = createOrder(member);
+        Delivery delivery = createDelivery(member);
+
+        order.setDelivery(delivery);
+        em.persist(order);
+        em.flush();
+        em.clear();
+
+        Order findOrder = em.find(Order.class, order.getId());
+        Long deliveryId = findOrder.getDelivery().getId();
+        System.out.println("deliveryId = " + deliveryId);
+
+        System.out.println("findOrder.getDelivery().getOrder() = " + findOrder.getDelivery().getOrder());
+    }
+    
+    private Delivery createDelivery(Member member) {
+        Delivery delivery = new Delivery();
+        delivery.setDeliveryStatus(DeliveryStatus.READY);
+        Address address = member.getAddress();
+        return delivery;
+    }
+
+    private Order createOrder(Member member) {
+        Order order = new Order();
+        order.setMember(member);
+        order.setOrderDate(LocalDateTime.now());
+        order.setOrderAmount(2);
+        order.setOrderStatus(OrderStatus.ORDER);
+        em.persist(order);
+        return order;
+    }
+
+    private Member createMember(String name) {
+        Member member = new Member();
+        member.setName(name);
+        Address address = new Address("Seoul", "Teheran", "12345");
+        member.setAddress(address);
+        em.persist(member);
+        return member;
+    }
+}
+````
+
+#### 일대일 / 다대일 연관관계
+![db_table4](https://user-images.githubusercontent.com/5433728/149707688-2d93d646-6e4d-4c0c-b9f7-7cb32ea7b74a.jpg)
+
+![domain_entity_operator4](https://user-images.githubusercontent.com/5433728/149707241-ce99463a-4ef3-44f0-a5e7-1e28f20b1142.jpg)
+
+##### Item
+````java
+package com.innotree.bcs.bp.study.jpa.demo.item.domain;
+
+import com.innotree.bcs.bp.study.jpa.demo.order.domain.OrderItem;
+import lombok.Getter;
+import lombok.Setter;
+
+import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
+
+@Entity
+@TableGenerator(name = "ITEM_SEQ_GENERATOR", 
+        table = "MY_SEQUENCE", 
+        pkColumnValue = "ITEM_SEQ", 
+        allocationSize = 1)
+@Getter @Setter
+public class Item {
+    @Id @GeneratedValue(strategy = GenerationType.TABLE, 
+            generator = "ITEM_SEQ_GENERATOR")
+    @Column(name = "item_id")
+    private Long id;
+    private String name;
+    private int price;
+    private int StockQuantity;
+    private Long categoryId;
+    
+}
+
+````
+##### OrderItem
+```java
+
+@Entity
+@Getter @Setter
+public class OrderItem {
+    @Id
+    @GeneratedValue
+    @Column(name = "order_item_id")
+    private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "order_id")
+    private Order order;
+    @ManyToOne
+    @JoinColumn(name = "item_id")
+    private Item item;
+    private int orderPrice;
+    private int count;
+}
+```
+###### Order
+```java
+package com.innotree.bcs.bp.study.jpa.demo.order.domain;
+
+import com.innotree.bcs.bp.study.jpa.demo.delivery.domain.Delivery;
+import com.innotree.bcs.bp.study.jpa.demo.member.domain.Member;
+import lombok.Getter;
+import lombok.Setter;
+
+import javax.persistence.*;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+@Entity
+@Getter @Setter
+@Table(name = "orders")
+public class Order {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "order_id")
+    private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "member_id")
+    private Member member;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "delivery_id")
+    private Delivery delivery;
+
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+    private List<OrderItem> orderItems = new ArrayList<>();
+
+    private int orderPrice;
+    private int orderAmount;
+    private LocalDateTime orderDate;
+
+    @Enumerated(EnumType.STRING)
+    private OrderStatus orderStatus;
+
+    public void setMember(Member member) {
+        if(this.member != null) {
+            this.member.getOrders().remove(this);
+        }
+        this.member = member;
+        member.getOrders().add(this);
+    }
+
+    public void setDelivery(Delivery delivery) {
+        this.delivery = delivery;
+        delivery.setOrder(this);
+    }
+
+    public void addOrderItem(OrderItem orderItem) {
+        this.orderItems.add(orderItem);
+        orderItem.setOrder(this);
+    }
+}
+
+```
+##### OrderStatus
+````java
+package com.innotree.bcs.bp.study.jpa.demo.order.domain;
+
+public enum OrderStatus {
+    ORDER, CANCEL
+}
+````
+
+#### 상속관계 매핑
+
+![db_table4](https://user-images.githubusercontent.com/5433728/149707688-2d93d646-6e4d-4c0c-b9f7-7cb32ea7b74a.jpg)
+
+![domain_entity_operator5](https://user-images.githubusercontent.com/5433728/149710879-223bb7eb-eda2-4327-9593-83eba7479749.jpg)
+
+##### Item
+````java
+package com.innotree.bcs.bp.study.jpa.demo.item.domain;
+
+import com.innotree.bcs.bp.study.jpa.demo.order.domain.OrderItem;
+import lombok.Getter;
+import lombok.Setter;
+
+import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
+
+@Entity
+@TableGenerator(name = "ITEM_SEQ_GENERATOR", table = "MY_SEQUENCE", pkColumnValue = "ITEM_SEQ", allocationSize = 1)
+@Inheritance(strategy = InheritanceType.JOINED)
+@DiscriminatorColumn(name = "dtype")
+@Getter @Setter
+public abstract class Item {
+    @Id
+    @GeneratedValue(strategy = GenerationType.TABLE, generator = "ITEM_SEQ_GENERATOR")
+    @Column(name = "item_id")
+    private Long id;
+    private String name;
+    private int price;
+    private int StockQuantity;
+    private Long categoryId;
+}
+````
+##### Book
+````java
+package com.innotree.bcs.bp.study.jpa.demo.item.domain;
+
+import lombok.Getter;
+import lombok.Setter;
+
+import javax.persistence.DiscriminatorValue;
+import javax.persistence.Entity;
+
+@Entity
+@DiscriminatorValue(value = "B")
+@Getter @Setter
+public class Book extends Item{
+    private String author;
+    private String isbn;
+}
+````
+##### Album
+````java
+package com.innotree.bcs.bp.study.jpa.demo.item.domain;
+
+import lombok.Getter;
+import lombok.Setter;
+
+import javax.persistence.DiscriminatorValue;
+import javax.persistence.Entity;
+
+@Entity
+@DiscriminatorValue(value = "A")
+@Getter @Setter
+public class Album extends Item{
+    private String writer;
+    private String singer;
+}
+````
+
+##### Movie
+````java
+package com.innotree.bcs.bp.study.jpa.demo.item.domain;
+
+import lombok.Getter;
+import lombok.Setter;
+
+import javax.persistence.DiscriminatorValue;
+import javax.persistence.Entity;
+
+@Entity
+@DiscriminatorValue(value = "M")
+@Getter @Setter
+public class Movie extends Item {
+    private String director;
+    private String actor;
+}
+````
+#### 다대다 연관관계 매핑
+![db_table5](https://user-images.githubusercontent.com/5433728/149715397-d368675e-9c89-44b3-8940-25b7620baefd.jpg)
+
+![domain_entity_operator6](https://user-images.githubusercontent.com/5433728/149715573-5947ab43-da33-4b6a-bdb9-1efee0f14a82.jpg)
+
+
+##### Category
+```java
+package com.innotree.bcs.bp.study.jpa.demo.item.domain;
+
+import lombok.Getter;
+import lombok.Setter;
+
+import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
+
+@Entity
+@Getter @Setter
+public class Category {
+    @Id @GeneratedValue
+    private Long id;
+
+    @ManyToMany
+    @JoinTable(name = "category_item",
+            joinColumns = @JoinColumn(name = "category_id"),
+            inverseJoinColumns = @JoinColumn(name = "item_id"))
+    private List<Item> items = new ArrayList<>();
+
+    //카테고리의 계층 구조
+    @ManyToOne
+    @JoinColumn(name = "PARENT_ID")
+    private Category parent;
+
+    @OneToMany(mappedBy = "parent")
+    private List<Category> child = new ArrayList<>();
+
+    private String name;
+
+    public void addItem(Item item) {
+        items.add(item);
+    }
+}
+```
+##### Item
+```java
+package com.innotree.bcs.bp.study.jpa.demo.item.domain;
+
+import lombok.Getter;
+import lombok.Setter;
+
+import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
+
+@Entity
+@TableGenerator(name = "ITEM_SEQ_GENERATOR", table = "MY_SEQUENCE", pkColumnValue = "ITEM_SEQ", allocationSize = 1)
+@Inheritance(strategy = InheritanceType.JOINED)
+@DiscriminatorColumn(name = "dtype")
+@Getter @Setter
+public abstract class Item {
+    @Id
+    @GeneratedValue(strategy = GenerationType.TABLE, generator = "ITEM_SEQ_GENERATOR")
+    @Column(name = "item_id")
+    private Long id;
+    private String name;
+    private int price;
+    private int StockQuantity;
+
+    @ManyToMany(mappedBy = "items")
+    private List<Category> categories = new ArrayList<>();
+}
+```
+
+다음 내용 부터는 고객의 요구사항을 분석하여 JPA이용하여 도메인을 설계하고 도메인을 바탕으로 기능을 구헌하면서 JPA 구조와
 사용방법을 알아보도록 하겠다.
 
 ---
@@ -958,17 +1664,20 @@ public class Address {
     private String street;
     private String zipcode;
 
-    protected Address() {}
+    protected Address() {
+    }
 
     public Address(String city, String street, String zipcode) {
         this.city = city;
         this.street = street;
         this.zipcode = zipcode;
     }
+}
 
 ```
 * 회원 레포지토리 개발
 ```java
+
 package com.innotree.bcs.bp.study.jpa.demo.member.repository;
 
 import com.innotree.bcs.bp.study.jpa.demo.member.domain.Member;
@@ -2557,13 +3266,12 @@ public class HelloWorld {
 | `fixed` | 브라우저 창을 기준으로 배치 |  |
 
 
-값 | 의미 | 기본값
----|:---:|---:
-`static` | 유형(기준) 없음 / 배치 불가능 | `static`
-`relative` | 요소 **자신**을 기준으로 배치 |
-`absolute` | 위치 상 **_부모_(조상)요소**를 기준으로 배치 |
-`fixed` | **브라우저 창**을 기준으로 배치 |
-
+ | 값          | 의미 | 기본값|
+|------------|:---:|---:|
+| `static`   | 유형(기준) 없음 / 배치 불가능 | `static`|
+| `relative` | 요소 **자신**을 기준으로 배치 ||
+| `absolute` | 위치 상 **_부모_(조상)요소**를 기준으로 배치 ||
+|  `fixed`   | **브라우저 창**을 기준으로 배치 ||
 
 
 인용문(blockQuote)
