@@ -507,32 +507,7 @@ public class MemberRepository {
     }
 }
 ```
-4. logback-test.xml
-````xml
-<?xml version="1.0" encoding="UTF-8"?>
-<configuration>
-    <include resource="org/springframework/boot/logging/logback/base.xml" />
-    <appender
-            name="STDOUT"
-            class="ch.qos.logback.core.ConsoleAppender">
-        <encoder>
-            <pattern>%d{yyyy-MM-dd} [%thread] %-5level %logger{36} - %msg%n</pattern>
-        </encoder>
-    </appender>
-    <logger name="org.springframework" level="error" additivity="false"/>
-    <logger name="org.hibernate.SQL" level="error" additivity="false">
-        <appender-ref ref="STDOUT"/>
-    </logger>
-    <logger name="org.hibernate.type.descriptor.sql" level="trace" additivity="false">
-        <appender-ref ref="STDOUT"/>
-    </logger>
-    <logger name="org.hibernate" level="error">
-        <appender-ref ref="STDOUT"/>
-    </logger>
-</configuration>
-
-````
-5. 테스트(src에 main과 test 폴더가 존재하는데 테스트파일은 test폴더 아래에 만든다)
+4. 테스트(src에 main과 test 폴더가 존재하는데 테스트파일은 test폴더 아래에 만든다)
 ````java
 package com.innotree.bcs.bp.study.jpa.demo.member.repository;
 
@@ -566,6 +541,32 @@ class MemberRepositoryTest {
         assertThat(findMember).isEqualTo(member);
     }
 }
+````
+
+5. logback-test.xml
+````xml
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/base.xml" />
+    <appender
+            name="STDOUT"
+            class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+    <logger name="org.springframework" level="error" additivity="false"/>
+    <logger name="org.hibernate.SQL" level="error" additivity="false">
+        <appender-ref ref="STDOUT"/>
+    </logger>
+    <logger name="org.hibernate.type.descriptor.sql" level="trace" additivity="false">
+        <appender-ref ref="STDOUT"/>
+    </logger>
+    <logger name="org.hibernate" level="error">
+        <appender-ref ref="STDOUT"/>
+    </logger>
+</configuration>
+
 ````
 [그림 7 테스트성공 확인]
 
