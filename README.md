@@ -514,27 +514,25 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 @SpringBootTest
+@Transactional
+@Rollback(value = false)
 class MemberRepositoryTest {
     @Autowired MemberRepository repository;
 
     @Test
     @DisplayName(value = "회원저장")
-    @Transactional
-    @Rollback(value = false)
     public void save() {
         Member member = new Member();
-        member.setName("lee kyoungik");
-        Long savedId = repository.save(member);
+        member.setName("lee");
+        Long saveId = repository.save(member);
 
-        Member findMember = repository.findOne(savedId);
+        Member findMember = repository.findOne(saveId);
 
-        assertThat(savedId).isEqualTo(findMember.getId());
-        assertThat(findMember.getName()).isEqualTo(member.getName());
-        assertThat(findMember).isEqualTo(member);
+        System.out.println("findMember = " + findMember);
+
     }
+
 }
 ````
 
