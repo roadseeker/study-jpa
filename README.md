@@ -450,11 +450,6 @@ spring:
     properties:
       hibernate:
         format_sql: true
-logging:
-  level:
-    org.springframework: error
-    org.hibernate.SQL: error
-    org.hibernate.type.descriptor.sql: trace
 ```
 * spring.jpa.hibernate.ddl-auto: create  이 옵션은 애플리케이션 실행 시점에 테이블을 drop 하고, 다시 생성한다.
 
