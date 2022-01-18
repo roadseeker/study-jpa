@@ -1,5 +1,6 @@
 package com.innotree.bcs.bp.study.jpa.demo.item.domain;
 
+import com.innotree.bcs.bp.study.jpa.demo.exception.NotEnoughStockException;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -8,28 +9,33 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@TableGenerator(name = "ITEM_SEQ_GENERATOR", table = "MY_SEQUENCE", pkColumnValue = "ITEM_SEQ", allocationSize = 1)
-@Inheritance(strategy = InheritanceType.JOINED)
-@DiscriminatorColumn(name = "dtype")
 @Getter @Setter
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name = "dtype")
 public abstract class Item {
-    @Id @GeneratedValue(strategy = GenerationType.TABLE, generator = "ITEM_SEQ_GENERATOR")
+
+    @Id
+    @GeneratedValue
     @Column(name = "item_id")
     private Long id;
+
     private String name;
     private int price;
-    private int StockQuantity;
+    private int stockQuantity;
 
     @ManyToMany(mappedBy = "items")
     private List<Category> categories = new ArrayList<>();
 
-    @Override
-    public String toString() {
-        return "Item{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", price=" + price +
-                ", StockQuantity=" + StockQuantity +
-                '}';
+    //==비즈니스 로직==//
+    public void addStock(int quantity) {
+        this.stockQuantity += quantity;
+    }
+
+    public void removeStock(int quantity) {
+        int restStock = this.stockQuantity - quantity;
+        if(restStock < 0) {
+            throw new NotEnoughStockException("재고가 부족합니다");
+        }
+        this.stockQuantity = restStock;
     }
 }

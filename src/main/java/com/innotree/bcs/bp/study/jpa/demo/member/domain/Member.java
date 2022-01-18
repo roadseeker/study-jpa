@@ -16,14 +16,13 @@ public class Member {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "MEMBER_SEQ_GENERATOR")
     @Column(name = "member_id")
     private Long id;
-    @Column(unique = true, nullable = false, length = 20)
+
+    @Column(nullable = false, length = 20)
     private String name;
 
     @Embedded
     private Address address;
-//    private String city;
-//    private String street;
-//    private String zipcode;
+
     @OneToMany(mappedBy = "member")
     private List<Order> orders = new ArrayList<>();
 

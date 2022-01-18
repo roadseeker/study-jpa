@@ -10,8 +10,7 @@ import javax.persistence.*;
 @Entity
 @Getter @Setter
 public class Delivery {
-    @Id
-    @GeneratedValue
+    @Id @GeneratedValue
     @Column(name = "delivery_id")
     private Long id;
 
@@ -20,19 +19,7 @@ public class Delivery {
 
     @Embedded
     private Address address;
-//    private String city;
-//    private String street;
-//    private String zipcode;
-    @Enumerated(EnumType.STRING)
-    private DeliveryStatus deliveryStatus;
 
-    @Override
-    public String toString() {
-        return "Delivery{" +
-                "id=" + id +
-                ", order=" + order +
-                ", address=" + address +
-                ", deliveryStatus=" + deliveryStatus +
-                '}';
-    }
+    @Enumerated(EnumType.STRING)
+    private DeliveryStatus status;
 }
