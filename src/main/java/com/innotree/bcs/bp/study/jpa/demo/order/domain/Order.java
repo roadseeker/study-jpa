@@ -1,6 +1,7 @@
 package com.innotree.bcs.bp.study.jpa.demo.order.domain;
 
 import com.innotree.bcs.bp.study.jpa.demo.delivery.domain.Delivery;
+import com.innotree.bcs.bp.study.jpa.demo.delivery.domain.DeliveryStatus;
 import com.innotree.bcs.bp.study.jpa.demo.member.domain.Member;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,8 +15,7 @@ import java.util.List;
 @Getter @Setter
 @Table(name = "orders")
 public class Order {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id @GeneratedValue
     @Column(name = "order_id")
     private Long id;
 
@@ -23,24 +23,19 @@ public class Order {
     @JoinColumn(name = "member_id")
     private Member member;
 
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+    private List<OrderItem> orderItems = new ArrayList<>();
+
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "delivery_id")
     private Delivery delivery;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<OrderItem> orderItems = new ArrayList<>();
-
-    private int orderPrice;
-    private int orderAmount;
     private LocalDateTime orderDate;
 
     @Enumerated(EnumType.STRING)
-    private OrderStatus orderStatus;
+    private OrderStatus status;
 
     public void setMember(Member member) {
-        if(this.member != null) {
-            this.member.getOrders().remove(this);
-        }
         this.member = member;
         member.getOrders().add(this);
     }
@@ -51,18 +46,43 @@ public class Order {
     }
 
     public void addOrderItem(OrderItem orderItem) {
-        this.orderItems.add(orderItem);
+        orderItems.add(orderItem);
         orderItem.setOrder(this);
     }
 
-    @Override
-    public String toString() {
-        return "Order{" +
-                "id=" + id +
-                ", orderPrice=" + orderPrice +
-                ", orderAmount=" + orderAmount +
-                ", orderDate=" + orderDate +
-                ", orderStatus=" + orderStatus +
-                '}';
+    //==생성 메서드==//
+    public static Order createOrder(Member member, Delivery delivery, OrderItem... orderItems) {
+        Order order = new Order();
+        order.setMember(member);
+        order.setDelivery(delivery);
+        for(OrderItem orderItem : orderItems){
+            order.addOrderItem(orderItem);
+        }
+        order.setStatus(OrderStatus.ORDER);
+        order.setOrderDate(LocalDateTime.now());
+        return order;
     }
+    //==비즈니스 로직==//
+    /** 주문취소 */
+    public void cancel() {
+        if(delivery.getStatus() == DeliveryStatus.COMP){
+            throw new IllegalStateException("이미 배송완료된 상품은 취소가 불가능합니다");
+        }
+
+        this.setStatus(OrderStatus.CANCEL);
+        for(OrderItem orderItem : orderItems) {
+            orderItem.cancel();
+        }
+    }
+
+    //==조회 로직==//
+    /** 전체 주문가격조회 */
+    public int getTotalPrice() {
+        int totalPrice = 0;
+        for(OrderItem orderItem : orderItems){
+            totalPrice += orderItem.getTotalPrice();
+        }
+        return totalPrice;
+    }
+
 }
