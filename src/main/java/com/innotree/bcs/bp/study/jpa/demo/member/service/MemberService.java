@@ -14,6 +14,7 @@ import java.util.List;
 public class MemberService {
     private final MemberRepository memberRepository;
 
+    @Transactional
     public Long join(Member member){
         List<Member> findMembers = memberRepository.findByName(member.getName());
         if(!findMembers.isEmpty()){

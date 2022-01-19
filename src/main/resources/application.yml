@@ -7,14 +7,14 @@ spring:
     cache: false
     template-resolver-order: 0
   datasource:
-    url: jdbc:h2:tcp://localhost/~/demoshop;mode=mysql
+    url: jdbc:h2:tcp://localhost/~/demoshop
     username: sa
     password:
     driver-class-name: org.h2.Driver
   jpa:
     hibernate:
-      ddl-auto: create
-      dialect: org.hibernate.dialect.MySQL57Dialect
+      ddl-auto: update
+      dialect: org.hibernate.dialect.H2Dialect
     properties:
       hibernate:
         show_sql: true

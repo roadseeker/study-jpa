@@ -2752,86 +2752,114 @@ fieldError' : 'form-control'">
   * 상품 기능
 1. ItemController
 ```java
-package com.innotree.bcs.bp.study.jpa.demo.web.controller;
+package com.innotree.bcs.bp.study.jpa.demo.web.items;
 
-import com.innotree.bcs.bp.study.jpa.demo.product.domain.Book;
-import com.innotree.bcs.bp.study.jpa.demo.product.domain.Item;
-import com.innotree.bcs.bp.study.jpa.demo.product.service.ItemService;
-import com.innotree.bcs.bp.study.jpa.demo.web.form.BookForm;
+import com.innotree.bcs.bp.study.jpa.demo.item.domain.Book;
+import com.innotree.bcs.bp.study.jpa.demo.item.domain.Item;
+import com.innotree.bcs.bp.study.jpa.demo.item.service.ItemService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
-import org.modelmapper.spi.MatchingStrategy;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
-import javax.validation.Valid;
 import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
 public class ItemController {
-
     private final ItemService itemService;
 
     @GetMapping(value = "/items/new")
-    public String createItemForm(Model model) {
-        model.addAttribute("form", new BookForm());
-        return "items/createItemForm";
+    public String crateItemForm(Model model) {
+        model.addAttribute("itemForm", new BookForm());
+        return "items/crateItemForm";
     }
 
     @PostMapping(value = "/items/new")
-    public String createItem(@Valid BookForm form, BindingResult result) {
+    public String createItem(BookForm form, Model model) {
         Book book = new Book();
-        book.setName(form.getName());
-        book.setPrice(form.getPrice());
-        book.setStockQuantity(form.getStockQuantity());
         book.setAuthor(form.getAuthor());
+        book.setPrice(form.getPrice());
         book.setIsbn(form.getIsbn());
+        book.setName(form.getName());
+        book.setStockQuantity(form.getStockQuantity());
         itemService.saveItem(book);
-
-        return "redirect:/items";
+        return "items/itemList";
     }
 
     @GetMapping(value = "/items")
-    public String listItem(Model model) {
+    public String itemList(Model model) {
         List<Item> items = itemService.findItems();
         model.addAttribute("items", items);
-        return "/items/itemList";
+        return "items/itemList";
     }
 
     @GetMapping(value = "/items/{itemId}/edit")
-    public String updateItemForm(@PathVariable("itemId") Long itemId, Model model) {
-        Book item = (Book)itemService.findOne(itemId);
-
+    public String updateItemFrom(@PathVariable Long itemId, Model model) {
+        Book item = (Book) itemService.findOne(itemId);
         ModelMapper mapper = new ModelMapper();
         mapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
-        mapper.map(item, BookForm.class);
+        BookForm form = mapper.map(item, BookForm.class);
 
-        model.addAttribute("form", item);
-
+        model.addAttribute("form", form);
         return "items/updateItemForm";
     }
 
     @PostMapping(value = "/items/{itemId}/edit")
-    public String updateItem(@ModelAttribute("form")  @Valid BookForm form, BindingResult result, Model model) {
-
+    public String updateItem(@ModelAttribute("form") BookForm form, Model model) {
         ModelMapper mapper = new ModelMapper();
         mapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
         Book book = mapper.map(form, Book.class);
         itemService.saveItem(book);
-
         return "redirect:/items";
     }
 }
 
+
 ```
-2. BookForm
+3. build.gradle
+````
+plugins {
+	id 'org.springframework.boot' version '2.6.2'
+	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+	id 'java'
+}
+group = 'com.innotree.bcs.bp.study.jpa'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '11'
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+repositories {
+	mavenCentral()
+}
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	// https://mvnrepository.com/artifact/org.modelmapper/modelmapper
+	implementation group: 'org.modelmapper', name: 'modelmapper', version: '3.0.0'
+
+	compileOnly 'org.projectlombok:lombok'
+	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+	runtimeOnly 'com.h2database:h2'
+	annotationProcessor 'org.projectlombok:lombok'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+test {
+	useJUnitPlatform()
+}
+````
+
+5. BookForm
 ```java
 package com.innotree.bcs.bp.study.jpa.demo.web.form;
 
