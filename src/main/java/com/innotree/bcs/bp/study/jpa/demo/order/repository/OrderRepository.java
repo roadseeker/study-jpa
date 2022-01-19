@@ -3,8 +3,6 @@ package com.innotree.bcs.bp.study.jpa.demo.order.repository;
 import com.innotree.bcs.bp.study.jpa.demo.member.domain.Member;
 import com.innotree.bcs.bp.study.jpa.demo.order.domain.Order;
 import com.innotree.bcs.bp.study.jpa.demo.order.domain.OrderSearch;
-import org.apache.catalina.LifecycleState;
-import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
 
@@ -12,7 +10,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.*;
-import java.lang.annotation.Retention;
 import java.util.ArrayList;
 import java.util.List;
 

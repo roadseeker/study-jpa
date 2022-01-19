@@ -8,8 +8,6 @@ import com.innotree.bcs.bp.study.jpa.demo.order.domain.Order;
 import com.innotree.bcs.bp.study.jpa.demo.order.domain.OrderSearch;
 import com.innotree.bcs.bp.study.jpa.demo.order.domain.OrderStatus;
 import com.innotree.bcs.bp.study.jpa.demo.order.repository.OrderRepository;
-
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,11 +16,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @Transactional
